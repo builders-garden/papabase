@@ -1,0 +1,58 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id              Int              @id @default(autoincrement())
+  address         String           @unique
+  name            String?          @unique
+  avatarUrl       String?          @map("avatar_url")
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @default(now())
+
+  donations       Donation[]
+  campaigns       Campaign[]
+}
+
+model Campaign {
+  id              Int              @id @default(autoincrement())
+  name            String           @unique
+  description     String
+  xmtpGroupId     String           @map("xmtp_group_id")
+
+  recipientAddress String          @map("recipient_address")
+  githubRepoUrl    String          @map("github_repo_url")
+  githubRepoId    String           @map("github_repo_id")
+  websiteUrl      String?          @map("website_url")
+
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @default(now())
+
+
+  user            User             @relation(fields: [userId], references: [id])
+  userId          Int
+  
+  donations       Donation[]
+}
+
+model Donation {
+  id              Int              @id @default(autoincrement())
+  amount          Float
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @default(now())
+  user            User             @relation(fields: [userId], references: [id])
+  userId          Int
+  campaign        Campaign         @relation(fields: [campaignId], references: [id])
+  campaignId      Int
+}
