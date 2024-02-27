@@ -25,20 +25,27 @@ model User {
   campaigns       Campaign[]
 }
 
+
+enum CampaignStatus {
+  ACTIVE
+  CLOSED
+}
 model Campaign {
   id              Int              @id @default(autoincrement())
   name            String           @unique
   description     String
-  xmtpGroupId     String           @map("xmtp_group_id")
-
   recipientAddress String          @map("recipient_address")
   githubRepoUrl    String          @map("github_repo_url")
   githubRepoId    String           @map("github_repo_id")
   websiteUrl      String?          @map("website_url")
+  status          CampaignStatus   @default(ACTIVE)
+
+  image_url       String           @map("image_url")
+
+  xmtpGroupId     String           @map("xmtp_group_id")
 
   createdAt       DateTime         @default(now())
   updatedAt       DateTime         @default(now())
-
 
   user            User             @relation(fields: [userId], references: [id])
   userId          Int
