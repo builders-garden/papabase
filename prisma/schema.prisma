@@ -38,9 +38,9 @@ model Campaign {
   githubRepoUrl    String          @map("github_repo_url")
   githubRepoId    String           @map("github_repo_id")
   websiteUrl      String?          @map("website_url")
-  status          CampaignStatus   @default(ACTIVE)
+  status          CampaignStatus?   @default(ACTIVE)
 
-  image_url       String           @map("image_url")
+  imageUrl       String           @map("image_url")
 
   xmtpGroupId     String           @map("xmtp_group_id")
 
@@ -55,6 +55,7 @@ model Campaign {
 
 model Donation {
   id              Int              @id @default(autoincrement())
+  txHash          String           @unique
   amount          Float
   createdAt       DateTime         @default(now())
   updatedAt       DateTime         @default(now())
