@@ -72,6 +72,10 @@
   font-style: normal;
 }
 
+body {
+  font-family: "ClashDisplay-Medium", sans-serif !important;
+}
+
 .font-clash-display {
   font-family: "ClashDisplay-Bold", sans-serif;
 }
