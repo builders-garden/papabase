@@ -17,6 +17,7 @@ export const createCampaign = async (data: {
 
 export const updateCampaign = async (
   id: number,
+  userId: number,
   data: {
     name?: string;
     description?: string;
@@ -27,19 +28,26 @@ export const updateCampaign = async (
     status?: CampaignStatus;
   }
 ) => {
-  return await prisma.campaign.update({ where: { id }, data });
+  return await prisma.campaign.update({ where: { id, userId }, data });
 };
 
 export const getCampaignById = async (id: number) => {
-  return await prisma.campaign.findUnique({ where: { id } });
+  return await prisma.campaign.findUnique({
+    where: { id },
+    include: { user: true, donations: { include: { user: true } } },
+  });
 };
 
 export const getCampaignsByUserId = async (userId: number) => {
-  return await prisma.campaign.findMany({ where: { userId } });
+  return await prisma.campaign.findMany({
+    where: { userId },
+    include: { donations: true },
+  });
 };
 
 export const getCampaigns = async () => {
   return await prisma.campaign.findMany({
     orderBy: { createdAt: "desc" },
+    include: { donations: true, user: true },
   });
 };
