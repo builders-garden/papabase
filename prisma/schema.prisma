@@ -14,93 +14,90 @@ datasource db {
 }
 
 model Account {
-  id                 String    @id @default(cuid())
-  userId             Int
-  providerType       String
-  providerId         String
-  providerAccountId  String
-  refreshToken       String?
-  accessToken        String?
-  accessTokenExpires DateTime?
-  createdAt          DateTime  @default(now())
-  updatedAt          DateTime  @updatedAt
-  user               User      @relation(fields: [userId], references: [id])
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  refresh_token_expires_in Int?
+  accessToken      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
 
-  @@unique([providerId, providerAccountId])
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
 }
 
 model Session {
   id           String   @id @default(cuid())
-  userId       Int
-  expires      DateTime
   sessionToken String   @unique
-  accessToken  String   @unique
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-  user         User     @relation(fields: [userId], references: [id])
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
-model VerificationRequest {
-  id         String   @id @default(cuid())
+model VerificationToken {
   identifier String
   token      String   @unique
   expires    DateTime
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
 
   @@unique([identifier, token])
 }
 
 model User {
-  id              Int              @id @default(autoincrement())
-  address         String           @unique
-  name            String?          @unique
-  avatarUrl       String?          @map("avatar_url")
-  createdAt       DateTime         @default(now())
-  updatedAt       DateTime         @default(now())
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
 
-  donations       Donation[]
-  campaigns       Campaign[]
-  accounts        Account[]
-  sessions        Session[]
+  donations Donation[]
+  campaigns Campaign[]
+  accounts  Account[]
+  sessions  Session[]
 }
-
 
 enum CampaignStatus {
   ACTIVE
   CLOSED
 }
+
 model Campaign {
-  id              Int              @id @default(autoincrement())
-  name            String           @unique
-  description     String
+  id               Int             @id @default(autoincrement())
+  name             String          @unique
+  description      String
   recipientAddress String          @map("recipient_address")
   githubRepoUrl    String          @map("github_repo_url")
-  githubRepoId    String           @map("github_repo_id")
-  websiteUrl      String?          @map("website_url")
-  status          CampaignStatus?   @default(ACTIVE)
+  githubRepoId     String          @map("github_repo_id")
+  websiteUrl       String?         @map("website_url")
+  status           CampaignStatus? @default(ACTIVE)
 
-  imageUrl       String           @map("image_url")
+  imageUrl String @map("image_url")
 
-  xmtpGroupId     String           @map("xmtp_group_id")
+  xmtpGroupId String @map("xmtp_group_id")
 
-  createdAt       DateTime         @default(now())
-  updatedAt       DateTime         @default(now())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
 
-  user            User             @relation(fields: [userId], references: [id])
-  userId          Int
-  
-  donations       Donation[]
+  user   User   @relation(fields: [userId], references: [id])
+  userId String
+
+  donations Donation[]
 }
 
 model Donation {
-  id              Int              @id @default(autoincrement())
-  txHash          String           @unique
-  amount          Float
-  createdAt       DateTime         @default(now())
-  updatedAt       DateTime         @default(now())
-  user            User             @relation(fields: [userId], references: [id])
-  userId          Int
-  campaign        Campaign         @relation(fields: [campaignId], references: [id])
-  campaignId      Int
+  id         Int      @id @default(autoincrement())
+  txHash     String   @unique
+  amount     Float
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @default(now())
+  user       User     @relation(fields: [userId], references: [id])
+  userId     String
+  campaign   Campaign @relation(fields: [campaignId], references: [id])
+  campaignId Int
 }
