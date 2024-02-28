@@ -21,6 +21,7 @@
     "@prisma/client": "^5.10.2",
     "encoding": "^0.1.13",
     "framer-motion": "^11.0.6",
+    "imagekit": "^5.0.0",
     "lokijs": "^1.5.12",
     "lucide-react": "^0.341.0",
     "next": "14.1.0",
