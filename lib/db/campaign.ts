@@ -2,7 +2,7 @@ import { CampaignStatus } from "@prisma/client";
 import { prisma } from "../prisma";
 
 export const createCampaign = async (data: {
-  userId: number;
+  userId: string;
   name: string;
   description: string;
   recipientAddress: string;
@@ -11,13 +11,14 @@ export const createCampaign = async (data: {
   websiteUrl: string;
   imageUrl: string;
   xmtpGroupId: string;
+  xmtpGrouLinkId: string;
 }) => {
   return await prisma.campaign.create({ data });
 };
 
 export const updateCampaign = async (
   id: number,
-  userId: number,
+  userId: string,
   data: {
     name?: string;
     description?: string;
@@ -38,7 +39,7 @@ export const getCampaignById = async (id: number) => {
   });
 };
 
-export const getCampaignsByUserId = async (userId: number) => {
+export const getCampaignsByUserId = async (userId: string) => {
   return await prisma.campaign.findMany({
     where: { userId },
     include: { donations: true },
