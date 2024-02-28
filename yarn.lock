@@ -1023,6 +1023,11 @@
     "@motionone/dom" "^10.16.4"
     tslib "^2.3.1"
 
+"@next-auth/prisma-adapter@^0.4.4-canary.81":
+  version "0.4.4-canary.81"
+  resolved "https://registry.yarnpkg.com/@next-auth/prisma-adapter/-/prisma-adapter-0.4.4-canary.81.tgz#60620d750ef1926f6e74b2de4d05a57eb9838105"
+  integrity sha512-RXdjrRkK4A3ksMdGXIyDmYBcgdpmbVqSGDoaH2X7P/MLBngh3/GO8TFGpiLwiUt1o4+Py81KICZYvBgatRP+Ew==
+
 "@next/env@14.1.0":
   version "14.1.0"
   resolved "https://registry.yarnpkg.com/@next/env/-/env-14.1.0.tgz#43d92ebb53bc0ae43dcc64fb4d418f8f17d7a341"
