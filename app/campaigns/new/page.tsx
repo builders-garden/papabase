@@ -21,6 +21,8 @@ export default function NewCampaignPage() {
   const [repos, setRepos] = useState<any[]>([]);
   const [title, setTitle] = useState<string>("");
   const [description, setDescription] = useState<string>("");
+  const [receiver, setReceiver] = useState<string>("");
+  const [websiteUrl, setWebsiteUrl] = useState<string>("");
   const [value, setValue] = useState<any>(null);
   const [loading, setLoading] = useState<boolean>(false);
 
@@ -46,17 +48,27 @@ export default function NewCampaignPage() {
   const createCampaign = async () => {
     setLoading(true);
     try {
+      const client = getViemClient(provider);
+      // if (client) {
+      // const signer = toEthersWeb3ProviderWithSigner(client as any);
+      // const xmtpClient = await Client.create(signer.getSigner());
+      // const group = await xmtpClient.
+      const repo = repos.find((repo: any) => repo.id === parseInt(value));
       const body = {
-        repo: repos.find((repo: any) => repo.id === parseInt(value)),
-        title,
+        name: title,
         description,
+        recipientAddress: receiver,
+        websiteUrl,
+        githubRepoId: repo.id,
+        githubRepoUrl: repo.url,
+        imageUrl: "",
       };
       console.log(body);
-      const client = getViemClient(provider);
       await client?.signMessage({
         message: "Hello world!",
         account: account as `0x${string}`,
       });
+      // }
     } catch (error) {
       console.error(error);
     } finally {
@@ -113,6 +125,20 @@ export default function NewCampaignPage() {
               className="mt-4"
               value={description}
               onValueChange={(e) => setDescription(e)}
+            />
+            <Input
+              label="Project website URL"
+              className="mt-4"
+              placeholder="https://example.com"
+              value={websiteUrl}
+              onValueChange={(e) => setWebsiteUrl(e)}
+            />
+            <Input
+              label="Receiver"
+              className="mt-4"
+              placeholder="Address that will receive the campaign funds"
+              value={receiver}
+              onValueChange={(e) => setReceiver(e)}
             />
             <div className="flex-1"></div>
             <Button
