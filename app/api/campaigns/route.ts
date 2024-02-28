@@ -1,7 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createCampaign, getCampaigns } from "@/lib/db/campaign";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/app/lib/auth";
 
-export async function POST(req: NextRequest): Promise<NextResponse> {
+export async function POST(
+  req: NextRequest,
+  res: NextResponse
+): Promise<NextResponse> {
+  const session = await getServerSession(authOptions);
+
+  if (!session) {
+    return new NextResponse("Unauthorized", { status: 401 });
+  }
+
   const {
     name,
     description,
@@ -27,8 +38,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
   }
 
   const campaign = await createCampaign({
-    // TODO: Replace with the user ID from the session
-    userId: 1,
+    userId: session.user.id,
     name,
     description,
     recipientAddress,

@@ -2,7 +2,6 @@ import { prisma } from "@/lib/prisma";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import { NextAuthOptions } from "next-auth";
 import GithubProvider from "next-auth/providers/github";
-import { getCsrfToken } from "next-auth/react";
 import { SiweMessage } from "siwe";
 import CredentialsProvider from "next-auth/providers/credentials";
 
