@@ -38,16 +38,21 @@ export async function POST(
     return new NextResponse("Missing required fields", { status: 422 });
   }
 
+  let groupId, groupLink;
+
   try {
+    console.log("creating group");
     const groupsClient = await createClient("converse.db");
-    const { groupId, groupLinkId } = await createGroupLink(
+    const groupData = await createGroupLink(
       groupsClient,
       name,
       `Stay tuned with ${name}'s updates`
     );
+    groupId = groupData.topic;
+    groupLink = groupData.link;
   } catch (e) {
     console.error(e);
-    return new NextResponse("Failed to create group", { status: 500 });
+    return new NextResponse("Failed to create XMTP group", { status: 500 });
   }
 
   const campaign = await createCampaign({
@@ -60,8 +65,8 @@ export async function POST(
     websiteUrl,
     imageUrl,
     endDate: new Date(endDate),
-    xmtpGroupId: "groupId", // TODO: replace with "groupId"
-    xmtpGroupLinkId: "groupLinkId", // TODO: replace with "groupLinkId"
+    xmtpGroupId: groupId,
+    xmtpGroupLinkId: groupLink, 
   });
 
   return NextResponse.json(campaign, { status: 201 });

@@ -30,11 +30,21 @@ export async function shouldAddGroupMember(
   return true;
 }
 
+export interface XMTPGroup {
+  id: string;
+  topic: string;
+  webhook: string;
+  adminToken: string;
+  name: string;
+  description: string;
+  link: string;
+}
+
 export async function createGroupLink(
   client: GroupsClient,
   name: string,
   description: string
-): Promise<{ groupLinkId: string; groupId: string }> {
+): Promise<XMTPGroup> {
   const groupId = await client.createGroup("group-creator-is-admin");
   console.log("Creating group with id", groupId);
   const request = {
@@ -44,18 +54,16 @@ export async function createGroupLink(
     description,
   };
   console.log(request);
-  const data = await (
-    await fetch(CONVERSE_GROUP_LINK_ENDPOINT, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(request),
-    })
-  ).json();
+  const res = await fetch(CONVERSE_GROUP_LINK_ENDPOINT, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(request),
+  });
+  console.log(res);
+  const data = await res.json();
+  console.log("Group link data", data);
 
-  return {
-    groupLinkId: data as string,
-    groupId,
-  };
+  return data;
 }
