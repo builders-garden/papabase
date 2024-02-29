@@ -1,9 +1,11 @@
 import { prisma } from "@/lib/prisma";
+import Link from "next/link";
 
 export default async function DonateDashboard() {
   const [activeCampaigns, closedCampaigns] = await Promise.all([
     prisma.campaign.findMany({
       where: { status: "ACTIVE" },
+      orderBy: { endDate: "asc" },
     }),
     prisma.campaign.findMany({
       where: { status: "CLOSED" },
@@ -25,15 +27,16 @@ export default async function DonateDashboard() {
         </h3>
         {activeCampaigns.length === 0 && <p>No active campaigns</p>}
         {activeCampaigns.length > 0 && (
-          <div className="flex flex-row mt-4 overflow-x-scroll">
+          <div className="flex flex-row mt-4 overflow-x-scroll py-4">
             {activeCampaigns.map((campaign) => (
-              <div
-                className="p-4 bg-primary rounded-xl text-white aspect-square h-[200px] mr-4"
+              <Link
+                href={`/donate/${campaign.id}`}
+                className="p-4 bg-primary rounded-xl text-white aspect-square h-[200px] mr-4 hover:-translate-y-1 transition-transform flex flex-col space-y-2"
                 key={campaign.id}
               >
-                <h4 className="text-2xl">{campaign.name}</h4>
+                <h4 className="text-2xl leading-none">{campaign.name}</h4>
                 <h5 className="text-sm">{campaign.description}</h5>
-              </div>
+              </Link>
             ))}
           </div>
         )}
