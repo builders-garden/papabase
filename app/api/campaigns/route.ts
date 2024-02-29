@@ -24,7 +24,6 @@ export async function POST(
     websiteUrl,
     imageUrl,
     endDate,
-    endDate,
   } = await req.json();
 
   if (
@@ -67,7 +66,7 @@ export async function POST(
     imageUrl,
     endDate: new Date(endDate),
     xmtpGroupId: groupId,
-    xmtpGroupLinkId: groupLink, ,
+    xmtpGroupLinkId: groupLink,
   });
 
   return NextResponse.json(campaign, { status: 201 });
