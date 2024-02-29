@@ -97,7 +97,7 @@ export default function NewCampaignPage() {
             <p>
               Go check your campaign on the following{" "}
               <Link
-                href={`/campaigns/${campaignId}`}
+                href={`/donate/${campaignId}`}
                 className="font-clash-display text-primary"
               >
                 link
