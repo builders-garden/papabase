@@ -69,13 +69,7 @@ export default function NewCampaignPage() {
         imageUrl: "https://via.placeholder.com/150",
         endDate,
       };
-      console.log(body);
-      // await client?.signMessage({
-      //   message: "Hello world!",
-      //   account: account as `0x${string}`,
-      // });
-      // }
-      await fetch("/api/campaigns", {
+      const res = await fetch("/api/campaigns", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
