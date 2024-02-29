@@ -33,7 +33,7 @@ export async function PUT(
     return new NextResponse("Missing required fields", { status: 422 });
   }
 
-  const userId = session.user.id;
+  const userId = session.user.id.toString();
   const campaign = await updateCampaign(parseInt(id, 10), userId, {
     name,
     description,

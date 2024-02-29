@@ -27,7 +27,7 @@ export const POST = async (req: NextRequest): Promise<NextResponse> => {
 
 export const GET = async (req: NextRequest): Promise<NextResponse> => {
   // TODO: Replace with the user ID from the session
-  const userId = 10;
+  const userId = "10";
   const donations = await getDonationsByUserId(userId);
   return NextResponse.json(donations);
 };

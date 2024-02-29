@@ -10,8 +10,7 @@ export const createCampaign = async (data: {
   githubRepoId: string;
   websiteUrl: string;
   imageUrl: string;
-  xmtpGroupId: string;
-  xmtpGrouLinkId: string;
+  endDate: Date;
 }) => {
   return await prisma.campaign.create({ data });
 };

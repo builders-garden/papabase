@@ -1,7 +1,7 @@
 import { prisma } from "../prisma";
 
 export const createDonation = async (data: {
-  userId: number;
+  userId: string;
   campaignId: number;
   amount: number;
   txHash: string;
@@ -17,7 +17,7 @@ export const getDonationsByCampaignId = async (campaignId: number) => {
   });
 };
 
-export const getDonationsByUserId = async (userId: number) => {
+export const getDonationsByUserId = async (userId: string) => {
   return await prisma.donation.findMany({
     where: { userId },
     orderBy: { createdAt: "desc" },

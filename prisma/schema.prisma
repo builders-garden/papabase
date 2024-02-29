@@ -75,12 +75,10 @@ model Campaign {
   githubRepoUrl    String          @map("github_repo_url")
   githubRepoId     String          @map("github_repo_id")
   websiteUrl       String?         @map("website_url")
+  endDate          DateTime        @map("end_date")
   status           CampaignStatus? @default(ACTIVE)
 
   imageUrl String @map("image_url")
-
-  xmtpGroupId String @map("xmtp_group_id")
-  xmtpGroupLinkId String @map("xmtp_group_link_id")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now())
