@@ -26,6 +26,7 @@ export default function NewCampaignPage() {
   const [value, setValue] = useState<any>(null);
   const [duration, setDuration] = useState<any>("30");
   const [loading, setLoading] = useState<boolean>(false);
+  const [campaignId, setCampaignId] = useState<string>("");
 
   useEffect(() => {
     if (session && session?.user.accessToken) {
@@ -76,7 +77,7 @@ export default function NewCampaignPage() {
         },
         body: JSON.stringify(body),
       });
-
+      setCampaignId((await res.json()).id);
       setStep(step + 1);
     } catch (error) {
       console.error(error);
@@ -96,7 +97,7 @@ export default function NewCampaignPage() {
             <p>
               Go check your campaign on the following{" "}
               <Link
-                href={"/campaigns/1"}
+                href={`/campaigns/${campaignId}`}
                 className="font-clash-display text-primary"
               >
                 link
