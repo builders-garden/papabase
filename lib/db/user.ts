@@ -1,48 +1,49 @@
 import { prisma } from "../prisma";
 
 export const upsertUser = async (
-  address: string,
+  id: string,
   data: {
     address?: string;
     name?: string;
-    avatarUrl?: string;
+    imageUrl?: string;
   }
 ) => {
   return await prisma.user.upsert({
-    where: { address },
+    where: { id },
     update: data,
     create: {
-      address,
-      ...data,
+      address: data.address!,
+      name: data.name,
+      imageUrl: data.imageUrl,
     },
   });
 };
 
 export const createUser = async (
-  address: string,
+  id: string,
   data: {
     address: string;
     name: string;
-    avatarUrl: string;
+    imageUrl: string;
   }
 ) => {
-  return await upsertUser(address, data);
+  return await upsertUser(id, data);
 };
 
 export const updateUser = async (
-  address: string,
+  id: string,
   data: {
     name?: string;
-    avatarUrl?: string;
+    imageUrl?: string;
   }
 ) => {
-  return await upsertUser(address, data);
+  return await upsertUser(id, data);
 };
 
-export const getUserById = async (id: number) => {
+export const getUserById = async (id: string) => {
   return await prisma.user.findUnique({ where: { id } });
 };
 
 export const getUserByAddress = async (address: string) => {
-  return await prisma.user.findUnique({ where: { address } });
+  return await prisma.user.findFirst({ where: { address } });
 };
