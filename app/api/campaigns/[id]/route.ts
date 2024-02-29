@@ -1,4 +1,6 @@
+import { authOptions } from "@/app/lib/auth";
 import { getCampaignById, updateCampaign } from "@/lib/db/campaign";
+import { getServerSession } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function PUT(
@@ -6,6 +8,11 @@ export async function PUT(
   { params }: { params: { id: string } }
 ): Promise<NextResponse> {
   const { id } = params;
+  const session = await getServerSession(authOptions);
+
+  if (!session) {
+    return new NextResponse("Unauthorized", { status: 401 });
+  }
   const {
     name,
     description,
@@ -26,8 +33,7 @@ export async function PUT(
     return new NextResponse("Missing required fields", { status: 422 });
   }
 
-  // TODO: Replace with the user ID from the session
-  const userId = 0;
+  const userId = session.user.id;
   const campaign = await updateCampaign(parseInt(id, 10), userId, {
     name,
     description,

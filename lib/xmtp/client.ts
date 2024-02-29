@@ -2,7 +2,7 @@ import { Client } from "@xmtp/xmtp-js";
 import { createWalletClient, http } from "viem";
 import { mainnet } from "viem/chains";
 import { english, generateMnemonic, mnemonicToAccount } from "viem/accounts";
-import { buildCommandRunner } from "./command.js";
+import { buildCommandRunner } from "./command";
 import type {
   Group,
   CreateGroupResponse,
@@ -18,7 +18,7 @@ const BINARY_PATH = "./cli-binary";
 async function generateV2Client() {
   const mnemonic = generateMnemonic(english);
   const account = mnemonicToAccount(
-    "legal winner thank year wave sausage worth useful legal winner thank yellow",
+    "legal winner thank year wave sausage worth useful legal winner thank yellow"
   );
   const walletClient = createWalletClient({
     account,
@@ -63,7 +63,7 @@ export async function createClient(dbPath: string) {
   return {
     accountAddress,
     async createGroup(
-      permissions: PermissionInputs = "everyone-is-admin",
+      permissions: PermissionInputs = "everyone-is-admin"
     ): Promise<string> {
       const { group_id } = await runCommand<CreateGroupResponse>([
         "create-group",
@@ -73,7 +73,7 @@ export async function createClient(dbPath: string) {
     },
     async addMembers(
       groupId: string,
-      accountAddresses: string[],
+      accountAddresses: string[]
     ): Promise<void> {
       await runCommand([
         "add-group-members",
@@ -84,7 +84,7 @@ export async function createClient(dbPath: string) {
     },
     async removeMembers(
       groupId: string,
-      accountAddresses: string[],
+      accountAddresses: string[]
     ): Promise<void> {
       await runCommand([
         "remove-group-members",

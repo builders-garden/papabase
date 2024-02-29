@@ -54,6 +54,7 @@ export default function NewCampaignPage() {
       // const xmtpClient = await Client.create(signer.getSigner());
       // const group = await xmtpClient.
       const repo = repos.find((repo: any) => repo.id === parseInt(value));
+      // console.log(repo);
       const body = {
         name: title,
         description,
@@ -64,11 +65,18 @@ export default function NewCampaignPage() {
         imageUrl: "",
       };
       console.log(body);
-      await client?.signMessage({
-        message: "Hello world!",
-        account: account as `0x${string}`,
-      });
+      // await client?.signMessage({
+      //   message: "Hello world!",
+      //   account: account as `0x${string}`,
+      // });
       // }
+      await fetch("/api/campaigns", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(body),
+      });
     } catch (error) {
       console.error(error);
     } finally {
