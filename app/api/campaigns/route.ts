@@ -21,7 +21,7 @@ export async function POST(
     githubRepoId,
     websiteUrl,
     imageUrl,
-    endDate
+    endDate,
   } = await req.json();
 
   if (
@@ -35,7 +35,7 @@ export async function POST(
   ) {
     return new NextResponse("Missing required fields", { status: 422 });
   }
-
+  console.log(session.user);
   const campaign = await createCampaign({
     userId: session.user.id.toString(),
     name,
@@ -45,7 +45,7 @@ export async function POST(
     githubRepoId,
     websiteUrl,
     imageUrl,
-    endDate: new Date(endDate)
+    endDate: new Date(endDate),
   });
 
   return NextResponse.json(campaign, { status: 201 });
