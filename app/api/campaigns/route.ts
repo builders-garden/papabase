@@ -21,6 +21,7 @@ export async function POST(
     githubRepoId,
     websiteUrl,
     imageUrl,
+    endDate
   } = await req.json();
 
   if (
@@ -44,6 +45,7 @@ export async function POST(
     githubRepoId,
     websiteUrl,
     imageUrl,
+    endDate: new Date(endDate)
   });
 
   return NextResponse.json(campaign, { status: 201 });
