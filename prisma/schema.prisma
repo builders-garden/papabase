@@ -68,6 +68,10 @@ model Campaign {
   updatedAt        DateTime        @default(now())
   userId           String
   endDate          DateTime        @map("end_date")
+
+  xmtpGroupId String? @map("xmtp_group_id")
+  xmtpGroupLinkId String? @map("xmtp_group_link_id")
+  
   user             User            @relation(fields: [userId], references: [id])
   donations        Donation[]
 }
