@@ -7,12 +7,12 @@ export async function PUT(
   req: NextRequest,
   { params }: { params: { id: string } }
 ): Promise<NextResponse> {
+  const { id } = params;
   const session = await getServerSession(authOptions);
 
   if (!session) {
     return new NextResponse("Unauthorized", { status: 401 });
   }
-  const { id } = params;
   const {
     name,
     description,

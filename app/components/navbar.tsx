@@ -23,7 +23,8 @@ export default function Navbar() {
             return (
               <div className="flex flex-row items-center space-x-2">
                 <Button as={Link} href="/campaigns/new" color="primary">
-                  Create campaign
+                  <span className="hidden md:block">Create campaign</span>
+                  <span className="block md:hidden">Create</span>
                 </Button>
                 <Button
                   color="primary"

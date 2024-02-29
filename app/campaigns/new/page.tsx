@@ -21,13 +21,14 @@ export default function NewCampaignPage() {
   const [repos, setRepos] = useState<any[]>([]);
   const [title, setTitle] = useState<string>("");
   const [description, setDescription] = useState<string>("");
-  const [receiver, setReceiver] = useState<string>("");
+  const [receiver, setReceiver] = useState<string>(account || "");
   const [websiteUrl, setWebsiteUrl] = useState<string>("");
   const [value, setValue] = useState<any>(null);
+  const [duration, setDuration] = useState<any>("30");
   const [loading, setLoading] = useState<boolean>(false);
 
   useEffect(() => {
-    if (session) {
+    if (session && session?.user.accessToken) {
       fetchRepos();
     }
   }, [session]);
@@ -54,21 +55,35 @@ export default function NewCampaignPage() {
       // const xmtpClient = await Client.create(signer.getSigner());
       // const group = await xmtpClient.
       const repo = repos.find((repo: any) => repo.id === parseInt(value));
+      // console.log(repo);
+
+      // end date is now + 1 year
+      const endDate = Date.now() + parseInt(duration) * 24 * 60 * 60 * 1000;
       const body = {
         name: title,
         description,
         recipientAddress: receiver,
         websiteUrl,
-        githubRepoId: repo.id,
+        githubRepoId: repo.id.toString(),
         githubRepoUrl: repo.url,
-        imageUrl: "",
+        imageUrl: "https://via.placeholder.com/150",
+        endDate,
       };
       console.log(body);
-      await client?.signMessage({
-        message: "Hello world!",
-        account: account as `0x${string}`,
-      });
+      // await client?.signMessage({
+      //   message: "Hello world!",
+      //   account: account as `0x${string}`,
+      // });
       // }
+      await fetch("/api/campaigns", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(body),
+      });
+
+      setStep(step + 1);
     } catch (error) {
       console.error(error);
     } finally {
@@ -78,28 +93,41 @@ export default function NewCampaignPage() {
 
   const renderStep = () => {
     switch (step) {
+      case 2:
+        return (
+          <>
+            <h3 className="text-2xl md:text-3xl font-clash-display">
+              Campaign created successfully!
+            </h3>
+            <p>
+              Go check your campaign on the following{" "}
+              <Link
+                href={"/campaigns/1"}
+                className="font-clash-display text-primary"
+              >
+                link
+              </Link>
+              .
+            </p>
+          </>
+        );
       case 1:
         return (
           <>
-            <h3 className="text-3xl font-clash-display">
+            <h3 className="text-2xl md:text-3xl font-clash-display">
               Create your campaign
             </h3>
             <p>
               Start now by creating your first campaign on{" "}
               <span className="font-clash-display text-primary">papabase</span>.
             </p>
-            {!session && (
-              <Button className="mt-4" onPress={() => signIn("github")}>
-                <Github />
-                Connect Github
-              </Button>
-            )}
             {session && (
               <Select
                 label="Select a Github repository"
                 className="mt-4"
                 selectedKeys={value ? [value] : []}
                 onChange={(e) => setValue(e.target.value)}
+                isRequired
               >
                 {repos.map((repo) => (
                   <SelectItem
@@ -118,6 +146,7 @@ export default function NewCampaignPage() {
               placeholder="My awesome campaign"
               value={title}
               onValueChange={(e) => setTitle(e)}
+              isRequired
             />
             <Textarea
               label="Campaign description"
@@ -125,7 +154,32 @@ export default function NewCampaignPage() {
               className="mt-4"
               value={description}
               onValueChange={(e) => setDescription(e)}
+              isRequired
             />
+
+            <Select
+              label="Campaign duration"
+              placeholder="Select a duration for the campaign"
+              className="mt-4"
+              selectedKeys={duration ? [duration] : []}
+              onChange={(e) => setDuration(e.target.value)}
+            >
+              <SelectItem key={"30"} value={"30"}>
+                30 days
+              </SelectItem>
+              <SelectItem key={"90"} value={"90"}>
+                90 days
+              </SelectItem>
+              <SelectItem key={"180"} value={"180"}>
+                180 days
+              </SelectItem>
+              <SelectItem key={"365"} value={"365"}>
+                1 year
+              </SelectItem>
+              <SelectItem key={"730"} value={"730"}>
+                2 years
+              </SelectItem>
+            </Select>
             <Input
               label="Project website URL"
               className="mt-4"
@@ -140,6 +194,7 @@ export default function NewCampaignPage() {
               value={receiver}
               onValueChange={(e) => setReceiver(e)}
             />
+
             <div className="flex-1"></div>
             <Button
               color="primary"
@@ -218,7 +273,7 @@ export default function NewCampaignPage() {
         <h1 className="text-7xl font-clash-display text-white">papabase</h1>
         <h2 className="text-2xl text-white">web3 is just a family business</h2>
       </div>
-      <div className="bg-white flex flex-col p-12">{renderStep()}</div>
+      <div className="bg-white flex flex-col p-8 md:p-12">{renderStep()}</div>
     </main>
   );
 }

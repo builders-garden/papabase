@@ -24,6 +24,7 @@ export async function POST(
     websiteUrl,
     imageUrl,
     endDate,
+    endDate,
   } = await req.json();
 
   if (
@@ -54,7 +55,7 @@ export async function POST(
     console.error(e);
     return new NextResponse("Failed to create XMTP group", { status: 500 });
   }
-
+  console.log(session.user);
   const campaign = await createCampaign({
     userId: session.user.id.toString(),
     name,
@@ -66,7 +67,7 @@ export async function POST(
     imageUrl,
     endDate: new Date(endDate),
     xmtpGroupId: groupId,
-    xmtpGroupLinkId: groupLink, 
+    xmtpGroupLinkId: groupLink, ,
   });
 
   return NextResponse.json(campaign, { status: 201 });
