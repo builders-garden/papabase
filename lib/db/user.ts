@@ -5,7 +5,7 @@ export const upsertUser = async (
   data: {
     address?: string;
     name?: string;
-    image?: string;
+    imageUrl?: string;
   }
 ) => {
   return await prisma.user.upsert({
@@ -14,30 +14,30 @@ export const upsertUser = async (
     create: {
       address: data.address!,
       name: data.name,
-      image: data.image,
+      imageUrl: data.imageUrl,
     },
   });
 };
 
 export const createUser = async (
-  address: string,
+  id: string,
   data: {
     address: string;
     name: string;
-    image: string;
+    imageUrl: string;
   }
 ) => {
-  return await upsertUser(address, data);
+  return await upsertUser(id, data);
 };
 
 export const updateUser = async (
-  address: string,
+  id: string,
   data: {
     name?: string;
-    image?: string;
+    imageUrl?: string;
   }
 ) => {
-  return await upsertUser(address, data);
+  return await upsertUser(id, data);
 };
 
 export const getUserById = async (id: string) => {

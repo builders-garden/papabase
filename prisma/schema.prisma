@@ -48,7 +48,7 @@ model User {
   address       String     @unique
   email         String?    @unique
   emailVerified DateTime?
-  image         String?
+  imageUrl         String?
   accounts      Account[]
   campaigns     Campaign[]
   donations     Donation[]

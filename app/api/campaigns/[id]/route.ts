@@ -5,7 +5,10 @@ import { uploadImage } from "@/lib/imagekit";
 import { getServerSession } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
 
-export const PUT = async (req: Request) => {
+export const PUT = async (
+  req: Request,
+  { params }: { params: { id: string } }
+) => {
   const session = await getServerSession(authOptions);
 
   if (!session) {
@@ -21,23 +24,25 @@ export const PUT = async (req: Request) => {
   const bytes = await file.arrayBuffer();
   const buffer = Buffer.from(bytes);
 
-  // Retrieve the Profile address
-  const user = await getUserById(session.user.id.toString());
+  const campaign = await getCampaignById(parseInt(params.id, 10));
 
-  if (!user) {
-    // If the profile doesn't exist, return a 404 Not Found response
-    return Response.json({ result: "Profile doesn't exist." }, { status: 404 });
+  if (!campaign) {
+    return Response.json(
+      { result: "Campaign doesn't exist." },
+      { status: 404 }
+    );
   }
 
-  const imageUpload = await uploadImage(
-    buffer,
-    `${user.address.toLowerCase()}_avatar`
-  );
+  const imageUpload = await uploadImage(buffer, `${campaign.name}_image`);
 
   // Update the profile with the provided data
-  const updatedProfile = await updateUser(user.address, {
-    image: imageUpload.url,
-  });
+  const updatedProfile = await updateCampaign(
+    parseInt(params.id, 10),
+    session.user.id,
+    {
+      imageUrl: imageUpload.url,
+    }
+  );
 
   // Return a 200 OK response with the updated profile
   return Response.json(updatedProfile, { status: 200 });
