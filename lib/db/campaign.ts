@@ -11,6 +11,8 @@ export const createCampaign = async (data: {
   websiteUrl: string;
   imageUrl: string;
   endDate: Date;
+  xmtpGroupId: string;
+  xmtpGroupLinkId: string;
 }) => {
   return await prisma.campaign.create({ data });
 };

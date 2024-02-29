@@ -1,7 +1,3 @@
-import { Client } from "@xmtp/xmtp-js";
-import { createWalletClient, http } from "viem";
-import { mainnet } from "viem/chains";
-import { english, generateMnemonic, mnemonicToAccount } from "viem/accounts";
 import { buildCommandRunner } from "./command";
 import type {
   Group,
@@ -10,28 +6,13 @@ import type {
   ListGroupsResponse,
   PermissionInputs,
 } from "./types";
-import path from "path";
 
 // This binary was downloaded from https://github.com/xmtp/libxmtp/releases/tag/cli-a8d3dd9
 // You must download an appropriate binary for your system's architecture
-console.log(process.cwd());
-const BINARY_PATH = path.join(process.cwd(), "lib", "xmtp", "cli-binary");
-
-async function generateV2Client() {
-  const mnemonic = generateMnemonic(english);
-  const account = mnemonicToAccount(
-    "legal winner thank year wave sausage worth useful legal winner thank yellow"
-  );
-  const walletClient = createWalletClient({
-    account,
-    chain: mainnet,
-    transport: http(),
-  });
-  // Register the XMTP client on the network so they can receive both DM and Group messages
-  // TODO: remove as any
-  const client = await Client.create(walletClient as any, { env: "dev" });
-  return mnemonic;
-}
+const BINARY_PATH =
+  process.env.NODE_ENV === "production"
+    ? "./cli-binary-linux"
+    : "./cli-binary-macos";
 
 export async function createClient(dbPath: string) {
   const runCommand = buildCommandRunner(BINARY_PATH, [
@@ -58,8 +39,7 @@ export async function createClient(dbPath: string) {
   try {
     accountAddress = await getAccountAddress();
   } catch (e) {
-    const mnemonic = await generateV2Client();
-    accountAddress = await register(mnemonic);
+    accountAddress = await register(process.env.XMTP_ADMIN_MNEMONIC!);
   }
 
   return {
