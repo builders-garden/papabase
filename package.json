@@ -22,7 +22,7 @@
     "@particle-network/connect-react-ui": "^1.2.1",
     "@particle-network/connectkit": "^1.3.6",
     "@prisma/client": "^5.10.2",
-    "@xmtp/xmtp-js": "^11.3.14",
+    "@xmtp/xmtp-js": "^11.3.12",
     "encoding": "^0.1.13",
     "ethers": "5.7.2",
     "framer-motion": "^11.0.6",

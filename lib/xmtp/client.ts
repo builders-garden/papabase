@@ -10,12 +10,10 @@ import type {
   ListGroupsResponse,
   PermissionInputs,
 } from "./types";
-import path from "path";
 
 // This binary was downloaded from https://github.com/xmtp/libxmtp/releases/tag/cli-a8d3dd9
 // You must download an appropriate binary for your system's architecture
-console.log(process.cwd());
-const BINARY_PATH = path.join(process.cwd(), "lib", "xmtp", "cli-binary");
+const BINARY_PATH = "./cli-binary";
 
 async function generateV2Client() {
   const mnemonic = generateMnemonic(english);
@@ -28,8 +26,7 @@ async function generateV2Client() {
     transport: http(),
   });
   // Register the XMTP client on the network so they can receive both DM and Group messages
-  // TODO: remove as any
-  const client = await Client.create(walletClient as any, { env: "dev" });
+  await Client.create(walletClient, { env: "dev" });
   return mnemonic;
 }
 

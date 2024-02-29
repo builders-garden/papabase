@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { createCampaign, getCampaigns } from "@/lib/db/campaign";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/lib/auth";
+import { createClient } from "@/lib/xmtp/client";
+import { createGroupLink } from "@/lib/xmtp/server";
 
 export async function POST(
   req: NextRequest,
@@ -21,7 +23,7 @@ export async function POST(
     githubRepoId,
     websiteUrl,
     imageUrl,
-    endDate
+    endDate,
   } = await req.json();
 
   if (
@@ -36,6 +38,18 @@ export async function POST(
     return new NextResponse("Missing required fields", { status: 422 });
   }
 
+  try {
+    const groupsClient = await createClient("converse.db");
+    const { groupId, groupLinkId } = await createGroupLink(
+      groupsClient,
+      name,
+      `Stay tuned with ${name}'s updates`
+    );
+  } catch (e) {
+    console.error(e);
+    return new NextResponse("Failed to create group", { status: 500 });
+  }
+
   const campaign = await createCampaign({
     userId: session.user.id.toString(),
     name,
@@ -45,7 +59,9 @@ export async function POST(
     githubRepoId,
     websiteUrl,
     imageUrl,
-    endDate: new Date(endDate)
+    endDate: new Date(endDate),
+    xmtpGroupId: "groupId", // TODO: replace with "groupId"
+    xmtpGroupLinkId: "groupLinkId", // TODO: replace with "groupLinkId"
   });
 
   return NextResponse.json(campaign, { status: 201 });

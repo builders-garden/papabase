@@ -1,4 +1,3 @@
-import { fetch } from "undici";
 import { GroupsClient } from "./client";
 
 const CONVERSE_GROUP_LINK_ENDPOINT =
