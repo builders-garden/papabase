@@ -9,7 +9,10 @@ import type {
 
 // This binary was downloaded from https://github.com/xmtp/libxmtp/releases/tag/cli-a8d3dd9
 // You must download an appropriate binary for your system's architecture
-const BINARY_PATH = "./cli-binary";
+const BINARY_PATH =
+  process.env.NODE_ENV === "production"
+    ? "./cli-binary-linux"
+    : "./cli-binary-macos";
 
 export async function createClient(dbPath: string) {
   const runCommand = buildCommandRunner(BINARY_PATH, [
