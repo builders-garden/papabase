@@ -2,8 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 import { createCampaign, getCampaigns } from "@/lib/db/campaign";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/lib/auth";
-import { createGroupLink } from "@/lib/xmtp/server";
-import { createClient } from "@/lib/xmtp/client";
 
 export async function POST(
   req: NextRequest,
@@ -37,13 +35,6 @@ export async function POST(
     return new NextResponse("Missing required fields", { status: 422 });
   }
 
-  const groupsClient = await createClient("converse.db");
-  const { groupId, groupLinkId } = await createGroupLink(
-    groupsClient,
-    name,
-    `Stay tuned with ${name}'s updates`
-  );
-
   const campaign = await createCampaign({
     userId: session.user.id.toString(),
     name,
@@ -53,8 +44,6 @@ export async function POST(
     githubRepoId,
     websiteUrl,
     imageUrl,
-    xmtpGroupId: groupId,
-    xmtpGrouLinkId: groupLinkId,
   });
 
   return NextResponse.json(campaign, { status: 201 });
