@@ -14,6 +14,15 @@ export const PUT = async (
   if (!session) {
     return new NextResponse("Unauthorized", { status: 401 });
   }
+  const data = await req.formData();
+  const file: File | null = data.get("file") as unknown as File;
+
+  if (!file) {
+    return Response.json({ success: false });
+  }
+
+  const bytes = await file.arrayBuffer();
+  const buffer = Buffer.from(bytes);
 
   const campaign = await getCampaignById(parseInt(params.id, 10));
 
@@ -24,51 +33,17 @@ export const PUT = async (
     );
   }
 
-  const {
-    name,
-    description,
-    githubRepoUrl,
-    githubRepoId,
-    websiteUrl,
-    imageUrl,
-    status,
-  } = await req.json();
+  const imageUpload = await uploadImage(buffer, `${campaign.name}_image`);
 
-  if (
-    !name ||
-    !description ||
-    !githubRepoUrl ||
-    !githubRepoId ||
-    !websiteUrl ||
-    !imageUrl ||
-    !status
-  ) {
-    return new NextResponse("Missing required fields", { status: 422 });
-  }
-
-  const updatedCampaign = await updateCampaign(
+  // Update the profile with the provided data
+  const updatedProfile = await updateCampaign(
     parseInt(params.id, 10),
     session.user.id,
     {
-      name,
-      description,
-      status,
-      githubRepoUrl,
-      githubRepoId,
-      websiteUrl,
-      imageUrl,
+      imageUrl: imageUpload.url,
     }
   );
 
   // Return a 200 OK response with the updated profile
-  return Response.json(updatedCampaign, { status: 200 });
-};
-
-export const GET = async (
-  req: NextRequest,
-  { params }: { params: { id: string } }
-): Promise<NextResponse> => {
-  const { id } = params;
-  const campaign = await getCampaignById(parseInt(id, 10));
-  return NextResponse.json(campaign);
+  return Response.json(updatedProfile, { status: 200 });
 };
