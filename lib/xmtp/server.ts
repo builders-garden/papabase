@@ -1,9 +1,10 @@
+import { BASE_URL } from "../constants";
 import { GroupsClient } from "./client";
 
 const CONVERSE_GROUP_LINK_ENDPOINT =
   "https://backend-staging.converse.xyz/api/groups/create";
 
-const WEBHOOK_URL = `https://converse-invite-link-neekolas.replit.app/webhook`;
+const WEBHOOK_URL = `${BASE_URL}/groups/webhook`;
 
 export async function addGroupMember(
   client: GroupsClient,
