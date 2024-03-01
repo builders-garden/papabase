@@ -2,8 +2,7 @@ import {ACROSS_V3_ABI} from './abi'
 import { createWalletClient, http } from 'viem'
 import { base } from 'viem/chains'
 import { encodeAbiParameters, parseAbiParameters } from 'viem'
-
- 
+import { ACROSS_ADDRESS_POLYGON } from '../constants'
 const client = createWalletClient({
   chain: base,
   transport: http(),
@@ -18,7 +17,7 @@ export const bridgeTokens = async ( account: string, depositor: string, recipien
         [BigInt(campaignId), account as `0x${string}`]
     )
     const bridge = await client.writeContract({
-      address: "0x9295ee1d8C5b022Be115A2AD3c30C72E34e7F096",
+      address: ACROSS_ADDRESS_POLYGON as `0x${string}`,
       functionName: 'depositV3',
       args: [depositor, recipient, inputToken, outputToken, inputAmount, outputAmount, destinationChainId, exclusiveRelayer, quoteTimestamp, fillDeadline, exclusivityDeadline, message],
       abi: ACROSS_V3_ABI,
