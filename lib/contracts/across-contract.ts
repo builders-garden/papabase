@@ -1,8 +1,9 @@
 import { ACROSS_V3_ABI } from "./abi";
 import { createWalletClient, http } from "viem";
-import { base } from "viem/chains";
 import { encodeAbiParameters, parseAbiParameters } from "viem";
 import { ACROSS_ADDRESS_POLYGON } from "../constants";
+import { base } from "viem/chains";
+
 const client = createWalletClient({
   chain: base,
   transport: http(),

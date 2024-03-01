@@ -1,10 +1,10 @@
+import { chain } from "@/lib/constants";
 import { createWalletClient, custom } from "viem";
-import { base } from "viem/chains";
 
 export const getViemClient = (provider: any) => {
   if (!provider) return null;
   return createWalletClient({
-    chain: base,
+    chain: chain,
     transport: custom(provider),
   });
 };

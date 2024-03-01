@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useContext } from "react";
 import { ConnectedWallet, useWallets } from "@privy-io/react-auth";
 import { createPublicClient, createWalletClient, custom, http } from "viem";
-import { base } from "viem/chains";
 import {
   type SmartAccountClient,
   createSmartAccountClient,
@@ -12,6 +11,7 @@ import { createPimlicoPaymasterClient } from "permissionless/clients/pimlico";
 import {
   BASE_ENTRYPOINT_ADDRESS,
   SMART_ACCOUNT_FACTORY_ADDRESS,
+  chain,
 } from "../constants";
 
 /** Interface returned by custom `useSmartAccount` hook */
@@ -68,14 +68,14 @@ export const SmartAccountProvider = ({
       const eip1193provider = await eoa.getEthereumProvider();
       const privyClient = createWalletClient({
         account: eoa.address as `0x${string}`,
-        chain: base,
+        chain: chain,
         transport: custom(eip1193provider),
       });
 
       const customSigner = walletClientToCustomSigner(privyClient);
 
       const publicClient = createPublicClient({
-        chain: base, // Replace this with the chain of your app
+        chain: chain, // Replace this with the chain of your app
         transport: http(),
       });
 
@@ -94,7 +94,7 @@ export const SmartAccountProvider = ({
 
       const smartAccountClient = createSmartAccountClient({
         account: simpleSmartAccount,
-        chain: base, // Replace this with the chain for your app
+        chain: chain, // Replace this with the chain for your app
         transport: http(process.env.NEXT_PUBLIC_PIMLICO_BUNDLER_URL),
         sponsorUserOperation: pimlicoPaymaster.sponsorUserOperation, // If your app uses a paymaster for gas sponsorship
       });

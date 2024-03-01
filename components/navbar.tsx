@@ -9,7 +9,7 @@ import {
 } from "@nextui-org/react";
 import { sliceAddress } from "../app/lib/utils";
 import { useLogin, usePrivy } from "@privy-io/react-auth";
-import { useState } from "react";
+import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 
 export default function Navbar() {
@@ -21,7 +21,7 @@ export default function Navbar() {
   });
   const router = useRouter();
 
-  useState(() => {
+  useEffect(() => {
     if (authenticated && !user?.wallet) {
       createWallet();
     }

@@ -4,7 +4,7 @@ import { SessionProvider } from "next-auth/react";
 import { SmartAccountProvider } from "@/lib/hooks/smart-account-context";
 import { useRouter } from "next/navigation";
 import { PrivyProvider } from "@privy-io/react-auth";
-import { base } from "viem/chains";
+import { chain } from "@/lib/constants";
 
 export default function Providers({
   children,
@@ -25,7 +25,7 @@ export default function Providers({
           createOnLogin: "users-without-wallets",
           noPromptOnSignature: true,
         },
-        defaultChain: base,
+        defaultChain: chain,
       }}
     >
       <SmartAccountProvider>

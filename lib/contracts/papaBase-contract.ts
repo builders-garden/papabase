@@ -1,7 +1,7 @@
 import { PAPABASE_ABI } from "./abi";
 import { createWalletClient, http } from "viem";
-import { base } from "viem/chains";
 import { PAPABASE_ADDRESS } from "../constants";
+import { base } from "viem/chains";
 
 const client = createWalletClient({
   chain: base,
@@ -71,7 +71,7 @@ export const recurringDepositToCampaign = async (
   campaignId: number,
   recurringAmount: bigint,
   donationTimes: number,
-  frequency: number,
+  frequency: number
 ) => {
   const deposit = await client.writeContract({
     address: PAPABASE_ADDRESS as `0x${string}`,
