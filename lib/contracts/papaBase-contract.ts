@@ -1,7 +1,7 @@
 import { PAPABASE_ABI } from "./abi";
 import { createWalletClient, http } from "viem";
 import { base } from "viem/chains";
-import { PAPABASE_BASE_ADDRESS } from "../constants";
+import { PAPABASE_ADDRESS } from "../constants";
 
 const client = createWalletClient({
   chain: base,
@@ -16,7 +16,7 @@ export const createCampaign = async (
   endDate: number
 ) => {
   const campaign = await client.writeContract({
-    address: PAPABASE_BASE_ADDRESS as `0x${string}`,
+    address: PAPABASE_ADDRESS as `0x${string}`,
     functionName: "createCampaign",
     args: [name, description, endDate],
     abi: PAPABASE_ABI,
