@@ -1,5 +1,6 @@
 "use client";
-import { Button, Link, Skeleton } from "@nextui-org/react";
+import DonateModal from "@/components/donate-modal";
+import { Button, Link, Skeleton, useDisclosure } from "@nextui-org/react";
 import { usePrivy } from "@privy-io/react-auth";
 import { useEffect, useState } from "react";
 
@@ -10,6 +11,7 @@ export default function DonateCampaign({
 }) {
   const [campaign, setCampaign] = useState<any | null>(null);
   const { user } = usePrivy();
+  const { isOpen, onOpen, onOpenChange } = useDisclosure();
 
   useEffect(() => {
     fetchCampaign();
@@ -74,7 +76,9 @@ export default function DonateCampaign({
                 {campaign.name}
               </h3>
               {user && campaign.userId !== user.id && (
-                <Button color="primary">Donate</Button>
+                <Button color="primary" onPress={() => onOpen()}>
+                  Donate
+                </Button>
               )}
               {/* {user && campaign.userId === user.id && (
                 <div className="flex flex-row space-x-2 items-center">
@@ -119,6 +123,7 @@ export default function DonateCampaign({
         <span className="font-clash-display">Donations</span>
       </h3>
       {campaign.donations.length === 0 && <p>No donations, yet!</p>}
+      <DonateModal isOpen={isOpen} onOpenChange={onOpenChange} />
     </div>
   );
 }

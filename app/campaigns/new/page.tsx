@@ -1,5 +1,7 @@
 "use client";
 import { sliceAddress } from "@/app/lib/utils";
+import { chain } from "@/lib/constants";
+import { createContractCampaign } from "@/lib/contracts/papaBase-contract";
 import { Button, Input, Select, SelectItem, Textarea } from "@nextui-org/react";
 import { Octokit } from "@octokit/rest";
 import { useLogin, usePrivy } from "@privy-io/react-auth";
@@ -7,6 +9,7 @@ import { ArrowLeft, Check, Github } from "lucide-react";
 import { signIn, useSession } from "next-auth/react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { createWalletClient, http } from "viem";
 
 export default function NewCampaignPage() {
   const [step, setStep] = useState<number>(0);
@@ -50,16 +53,23 @@ export default function NewCampaignPage() {
   const createCampaign = async () => {
     setLoading(true);
     try {
-      // const client = getViemClient(provider);
-      // if (client) {
-      // const signer = toEthersWeb3ProviderWithSigner(client as any);
-      // const xmtpClient = await Client.create(signer.getSigner());
-      // const group = await xmtpClient.
-      const repo = repos.find((repo: any) => repo.id === parseInt(value));
-      // console.log(repo);
-
-      // end date is now + 1 year
+      const walletClient = createWalletClient({
+        chain: chain,
+        account: user?.wallet?.address! as `0x${string}`,
+        transport: http(),
+      });
       const endDate = Date.now() + parseInt(duration) * 24 * 60 * 60 * 1000;
+
+      await createContractCampaign(
+        walletClient,
+        user?.wallet?.address!,
+        title,
+        description,
+        endDate
+      );
+
+      const repo = repos.find((repo: any) => repo.id === parseInt(value));
+
       const body = {
         name: title,
         description,
@@ -67,7 +77,6 @@ export default function NewCampaignPage() {
         websiteUrl,
         githubRepoId: repo.id.toString(),
         githubRepoUrl: repo.url,
-        imageUrl: "https://via.placeholder.com/150",
         endDate,
       };
       const res = await fetch("/api/campaigns", {
