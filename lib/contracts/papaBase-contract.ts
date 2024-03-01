@@ -1,7 +1,7 @@
 import { PAPABASE_ABI } from "./abi";
 import { createWalletClient, http } from "viem";
-import { PAPABASE_ADDRESS } from "../constants";
 import { base } from "viem/chains";
+import { PAPABASE_BASE_ADDRESS } from "../constants";
 
 const client = createWalletClient({
   chain: base,
@@ -16,7 +16,7 @@ export const createCampaign = async (
   endDate: number
 ) => {
   const campaign = await client.writeContract({
-    address: PAPABASE_ADDRESS as `0x${string}`,
+    address: PAPABASE_BASE_ADDRESS as `0x${string}`,
     functionName: "createCampaign",
     args: [name, description, endDate],
     abi: PAPABASE_ABI,
@@ -27,7 +27,7 @@ export const createCampaign = async (
 // function to end a campaign
 export const endCampaign = async (account: string, campaignId: number) => {
   const campaign = await client.writeContract({
-    address: PAPABASE_ADDRESS as `0x${string}`,
+    address: PAPABASE_BASE_ADDRESS as `0x${string}`,
     functionName: "endCampaign",
     args: [campaignId],
     abi: PAPABASE_ABI,
@@ -42,7 +42,7 @@ export const depositToCampaign = async (
   amount: bigint
 ) => {
   const deposit = await client.writeContract({
-    address: PAPABASE_ADDRESS as `0x${string}`,
+    address: PAPABASE_BASE_ADDRESS as `0x${string}`,
     functionName: "depositFunds",
     args: [campaignId, amount],
     abi: PAPABASE_ABI,
@@ -57,7 +57,7 @@ export const withdrawFromCampaign = async (
   amount: bigint
 ) => {
   const withdraw = await client.writeContract({
-    address: PAPABASE_ADDRESS as `0x${string}`,
+    address: PAPABASE_BASE_ADDRESS as `0x${string}`,
     functionName: "campaignWithdrawFunds",
     args: [campaignId, amount],
     abi: PAPABASE_ABI,
@@ -74,7 +74,7 @@ export const recurringDepositToCampaign = async (
   frequency: number
 ) => {
   const deposit = await client.writeContract({
-    address: PAPABASE_ADDRESS as `0x${string}`,
+    address: PAPABASE_BASE_ADDRESS as `0x${string}`,
     functionName: "depositFundsRecurring",
     args: [account, campaignId, recurringAmount, donationTimes, frequency],
     abi: PAPABASE_ABI,
@@ -88,7 +88,7 @@ export const recurringWithdrawFromCampaign = async (
   depositId: number
 ) => {
   const withdraw = await client.writeContract({
-    address: PAPABASE_ADDRESS as `0x${string}`,
+    address: PAPABASE_BASE_ADDRESS as `0x${string}`,
     functionName: "withdrawRecurringDeposit",
     args: [depositId],
     abi: PAPABASE_ABI,
