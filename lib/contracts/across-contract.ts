@@ -1,6 +1,8 @@
 import {ACROSS_V3_ABI} from './abi'
 import { createWalletClient, http } from 'viem'
 import { base } from 'viem/chains'
+import { encodeAbiParameters, parseAbiParameters } from 'viem'
+
  
 const client = createWalletClient({
   chain: base,
@@ -8,7 +10,13 @@ const client = createWalletClient({
 })
 
 // function to bridge tokens using Across api result
-export const bridgeTokens = async ( account: string, depositor: string, recipient: string, inputToken: string, outputToken: string, inputAmount: bigint, outputAmount: bigint, destinationChainId: number, exclusiveRelayer: string, quoteTimestamp: number, fillDeadline: number, exclusivityDeadline: number, message: string) => {
+export const bridgeTokens = async ( account: string, depositor: string, recipient: string, inputToken: string, outputToken: string, inputAmount: bigint, outputAmount: bigint, destinationChainId: number, exclusiveRelayer: string, quoteTimestamp: number, fillDeadline: number, exclusivityDeadline: number, campaignId: number) => {
+    // get the message parameters by encoding campaignId and address user
+    const message = 
+      encodeAbiParameters(
+        parseAbiParameters('uint256, address'),
+        [BigInt(campaignId), account as `0x${string}`]
+    )
     const bridge = await client.writeContract({
       address: "0x9295ee1d8C5b022Be115A2AD3c30C72E34e7F096",
       functionName: 'depositV3',
