@@ -1,5 +1,4 @@
-import { baseStyles } from '@nextui-org/react'
-import { createWalletClient, custom, http } from 'viem'
+import { createWalletClient, http } from 'viem'
 import { base } from 'viem/chains'
  
 const client = createWalletClient({

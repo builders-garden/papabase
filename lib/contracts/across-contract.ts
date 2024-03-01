@@ -1,6 +1,5 @@
 import {ACROSS_V3_ABI} from './abi'
-
-import { createWalletClient, custom, http } from 'viem'
+import { createWalletClient, http } from 'viem'
 import { base } from 'viem/chains'
  
 const client = createWalletClient({
