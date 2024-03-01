@@ -27,14 +27,19 @@ export interface TransactionDetails {
 
 export const getAcrossSuggestedFees = async (
   token: string,
+  originChainId: string,
   destinationChainId: string,
   amount: string,
-  message: string
+  message?: string
 ): Promise<TransactionDetails> => {
   const url = new URL("https://across.to/api/suggested-fees");
   url.searchParams.append("token", token);
   url.searchParams.append("destinationChainId", destinationChainId);
+  url.searchParams.append("originChainId", originChainId);
   url.searchParams.append("amount", amount);
+  if (message) {
+    url.searchParams.append("message", message);
+  }
   const response = await fetch(url);
   return response.json();
 };

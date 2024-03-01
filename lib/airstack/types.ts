@@ -1713,3 +1713,10 @@ export type NftTokenBalanceQueryVariables = Exact<{
 
 
 export type NftTokenBalanceQuery = { TokenBalances: { TokenBalance: Array<{ amount: string }> | null } | null, Tokens: { Token: Array<{ totalSupply: string | null }> | null } | null };
+
+export type GetAllSocialsQueryVariables = Exact<{
+  address: Scalars['Address']['input'];
+}>;
+
+
+export type GetAllSocialsQuery = { Socials: { Social: Array<{ blockchain: Blockchain | null, dappName: SocialDappName | null, profileName: string | null, userAssociatedAddresses: Array<any> | null, userId: string | null, userCreatedAtBlockTimestamp: any | null }> | null } | null };
