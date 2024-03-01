@@ -9,7 +9,6 @@ export const createCampaign = async (data: {
   githubRepoUrl: string;
   githubRepoId: string;
   websiteUrl: string;
-  imageUrl: string;
   endDate: Date;
   xmtpGroupId: string;
   xmtpGroupLinkId: string;

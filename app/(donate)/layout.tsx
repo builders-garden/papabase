@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import Navbar from "../components/navbar";
+import Navbar from "../../components/navbar";
 
 export const metadata: Metadata = {
   title: "papabase | Donate",

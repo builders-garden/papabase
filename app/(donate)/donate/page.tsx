@@ -11,6 +11,7 @@ export default async function DonateDashboard() {
       where: { status: "CLOSED" },
     }),
   ]);
+
   return (
     <div className="flex flex-col py-8 space-y-8 px-4 md:px-0">
       <div className="rounded-xl bg-primary py-24 w-full text-center">
@@ -31,11 +32,23 @@ export default async function DonateDashboard() {
             {activeCampaigns.map((campaign) => (
               <Link
                 href={`/donate/${campaign.id}`}
-                className="p-4 bg-primary rounded-xl text-white aspect-square h-[200px] mr-4 hover:-translate-y-1 transition-transform flex flex-col space-y-2"
+                className="p-4 relative bg-primary rounded-xl text-white aspect-square h-[200px] mr-4 hover:-translate-y-1 transition-transform flex flex-col space-y-2"
                 key={campaign.id}
               >
-                <h4 className="text-2xl leading-none">{campaign.name}</h4>
-                <h5 className="text-sm">{campaign.description}</h5>
+                <div
+                  style={{
+                    backgroundImage: `url('${campaign.imageUrl}')`,
+                    backgroundPosition: "center",
+                    objectFit: "fill",
+                    backgroundSize: "cover",
+                    backgroundBlendMode: "luminosity",
+                  }}
+                  className="opacity-0.6 absolute h-[200px] aspect-square top-0 left-0 rounded-lg z-0 opacity-40"
+                ></div>
+                <h4 className="text-2xl leading-none z-10">{campaign.name}</h4>
+                <h5 className="text-sm h-[100px] overflow-clip z-10">
+                  {campaign.description}
+                </h5>
               </Link>
             ))}
           </div>

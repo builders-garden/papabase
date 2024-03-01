@@ -1,67 +1,75 @@
-import { authOptions } from "@/app/lib/auth";
+import { privy } from "@/app/lib/privy";
 import { getCampaignById, updateCampaign } from "@/lib/db/campaign";
-import { getUserById, updateUser, upsertUser } from "@/lib/db/user";
-import { uploadImage } from "@/lib/imagekit";
-import { getServerSession } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
 
 export const PUT = async (
-  req: Request,
+  req: NextRequest,
   { params }: { params: { id: string } }
 ) => {
-  const session = await getServerSession(authOptions);
+  const accessToken = req.cookies.get("privy-token");
 
-  if (!session) {
+  if (!accessToken) {
     return new NextResponse("Unauthorized", { status: 401 });
   }
 
-  const campaign = await getCampaignById(parseInt(params.id, 10));
+  try {
+    const verifiedClaims = await privy.verifyAuthToken(accessToken.value);
+    const { userId } = verifiedClaims;
 
-  if (!campaign) {
-    return Response.json(
-      { result: "Campaign doesn't exist." },
-      { status: 404 }
-    );
-  }
+    const campaign = await getCampaignById(parseInt(params.id, 10));
 
-  const {
-    name,
-    description,
-    githubRepoUrl,
-    githubRepoId,
-    websiteUrl,
-    imageUrl,
-    status,
-  } = await req.json();
+    if (!campaign) {
+      return Response.json(
+        { result: "Campaign doesn't exist." },
+        { status: 404 }
+      );
+    }
 
-  if (
-    !name ||
-    !description ||
-    !githubRepoUrl ||
-    !githubRepoId ||
-    !websiteUrl ||
-    !imageUrl ||
-    !status
-  ) {
-    return new NextResponse("Missing required fields", { status: 422 });
-  }
-
-  const updatedCampaign = await updateCampaign(
-    parseInt(params.id, 10),
-    session.user.id,
-    {
+    const {
       name,
       description,
-      status,
       githubRepoUrl,
       githubRepoId,
       websiteUrl,
       imageUrl,
-    }
-  );
+      status,
+    } = await req.json();
 
-  // Return a 200 OK response with the updated profile
-  return Response.json(updatedCampaign, { status: 200 });
+    if (
+      !name ||
+      !description ||
+      !githubRepoUrl ||
+      !githubRepoId ||
+      !websiteUrl ||
+      !imageUrl ||
+      !status
+    ) {
+      return new NextResponse("Missing required fields", { status: 422 });
+    }
+
+    const updatedCampaign = await updateCampaign(
+      parseInt(params.id, 10),
+      userId,
+      {
+        name,
+        description,
+        status,
+        githubRepoUrl,
+        githubRepoId,
+        websiteUrl,
+        imageUrl,
+      }
+    );
+
+    // Return a 200 OK response with the updated profile
+    return Response.json(updatedCampaign, { status: 200 });
+  } catch (error) {
+    console.log(`Token verification failed with error ${error}.`);
+    return NextResponse.json(
+      { error: "Token verification failed" },
+      { status: 401 }
+    );
+  }
 };
 
 export const GET = async (

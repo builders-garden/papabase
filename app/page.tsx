@@ -14,7 +14,7 @@ export default function Home() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 1, delay: 0.5 }}
-          className="text-primary font-bold text-9xl font-clash-display"
+          className="text-primary font-bold text-6xl md:text-9xl font-clash-display"
         >
           papabase
         </motion.h1>
@@ -22,7 +22,7 @@ export default function Home() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 1, delay: 1.5 }}
-          className="text-primary text-3xl font-clash-display-regular"
+          className="text-primary text-2xl md:text-3xl text-center font-clash-display-regular"
         >
           web3 is just a family business
         </motion.h2>

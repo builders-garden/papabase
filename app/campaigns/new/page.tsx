@@ -1,13 +1,8 @@
 "use client";
 import { sliceAddress } from "@/app/lib/utils";
-import { getViemClient } from "@/app/lib/viem";
 import { Button, Input, Select, SelectItem, Textarea } from "@nextui-org/react";
 import { Octokit } from "@octokit/rest";
-import {
-  ConnectButton,
-  useAccount,
-  useParticleProvider,
-} from "@particle-network/connect-react-ui";
+import { useLogin, usePrivy } from "@privy-io/react-auth";
 import { ArrowLeft, Check, Github } from "lucide-react";
 import { signIn, useSession } from "next-auth/react";
 import Link from "next/link";
@@ -16,17 +11,22 @@ import { useEffect, useState } from "react";
 export default function NewCampaignPage() {
   const [step, setStep] = useState<number>(0);
   const { data: session } = useSession();
-  const account = useAccount();
-  const provider = useParticleProvider();
+  const { authenticated, user, createWallet } = usePrivy();
+  const { login } = useLogin({
+    onComplete: async (user, isNewUser) => {
+      await fetch("/api/register", { method: "POST" });
+    },
+  });
   const [repos, setRepos] = useState<any[]>([]);
   const [title, setTitle] = useState<string>("");
   const [description, setDescription] = useState<string>("");
-  const [receiver, setReceiver] = useState<string>(account || "");
+  const [receiver, setReceiver] = useState<string>("");
   const [websiteUrl, setWebsiteUrl] = useState<string>("");
   const [value, setValue] = useState<any>(null);
   const [duration, setDuration] = useState<any>("30");
   const [loading, setLoading] = useState<boolean>(false);
   const [campaignId, setCampaignId] = useState<string>("");
+  const [file, setFile] = useState<File | null>(null);
 
   useEffect(() => {
     if (session && session?.user.accessToken) {
@@ -35,8 +35,8 @@ export default function NewCampaignPage() {
   }, [session]);
 
   useEffect(() => {
-    if (account && session) setStep(1);
-  }, [account, session]);
+    if (authenticated && session) setStep(1);
+  }, [authenticated, session]);
 
   const fetchRepos = async () => {
     const octokit = new Octokit({
@@ -50,7 +50,7 @@ export default function NewCampaignPage() {
   const createCampaign = async () => {
     setLoading(true);
     try {
-      const client = getViemClient(provider);
+      // const client = getViemClient(provider);
       // if (client) {
       // const signer = toEthersWeb3ProviderWithSigner(client as any);
       // const xmtpClient = await Client.create(signer.getSigner());
@@ -77,7 +77,14 @@ export default function NewCampaignPage() {
         },
         body: JSON.stringify(body),
       });
-      setCampaignId((await res.json()).id);
+      const campaignId = (await res.json()).id;
+      setCampaignId(campaignId);
+      const formData = new FormData();
+      formData.append("file", file!);
+      await fetch(`/api/campaigns/${campaignId}/image`, {
+        method: "PUT",
+        body: formData,
+      });
       setStep(step + 1);
     } catch (error) {
       console.error(error);
@@ -189,11 +196,18 @@ export default function NewCampaignPage() {
               value={receiver}
               onValueChange={(e) => setReceiver(e)}
             />
-
+            <Button color="primary" className="mt-4">
+              <input
+                type="file"
+                onChange={(e) => setFile(e.target.files![0])}
+              />
+              Upload
+            </Button>
             <div className="flex-1"></div>
             <Button
               color="primary"
-              isDisabled={!title || !description || !value}
+              className="mt-4"
+              isDisabled={!title || !description || !value || !receiver}
               isLoading={loading}
               onPress={() => createCampaign()}
             >
@@ -219,38 +233,20 @@ export default function NewCampaignPage() {
               </Button>
             )}
             <p>Connect or create your Web3 wallet</p>
-            <ConnectButton.Custom>
-              {({
-                account,
-                chain,
-                openAccountModal,
-                openConnectModal,
-                openChainModal,
-                accountLoading,
-              }) => {
-                console.log(account);
-                if (account) {
-                  return (
-                    <Button
-                      color="primary"
-                      onClick={() => openAccountModal!()}
-                      variant="flat"
-                    >
-                      {sliceAddress(account)}
-                    </Button>
-                  );
-                }
-                return (
-                  <Button
-                    color="primary"
-                    className="w-full"
-                    onPress={() => openConnectModal!()}
-                  >
-                    Connect wallet
-                  </Button>
-                );
-              }}
-            </ConnectButton.Custom>
+            {authenticated && (
+              <Button color="primary" variant="flat">
+                {sliceAddress(user?.wallet?.address!)}
+              </Button>
+            )}
+            {!authenticated && (
+              <Button
+                color="primary"
+                className="w-full"
+                onPress={() => login()}
+              >
+                Connect wallet
+              </Button>
+            )}
           </div>
         );
     }
@@ -258,7 +254,7 @@ export default function NewCampaignPage() {
 
   return (
     <main className="grid grid-cols-1 md:grid-cols-2 h-screen">
-      <div className="hidden md:flex bg-primary flex-col items-center justify-center h-full w-full relative">
+      <div className="hidden md:flex bg-primary flex-col items-center justify-center h-full fixed w-[50%]">
         <Link href={"/"}>
           <ArrowLeft
             className="text-white absolute top-4 left-4 cursor-pointer hover:-translate-y-1 transition-transform"
@@ -268,7 +264,9 @@ export default function NewCampaignPage() {
         <h1 className="text-7xl font-clash-display text-white">papabase</h1>
         <h2 className="text-2xl text-white">web3 is just a family business</h2>
       </div>
-      <div className="bg-white flex flex-col p-8 md:p-12">{renderStep()}</div>
+      <div className="bg-white flex flex-col p-8 md:p-12 ml-0 md:ml-[100%] w-full">
+        {renderStep()}
+      </div>
     </main>
   );
 }

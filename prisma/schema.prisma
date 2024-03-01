@@ -20,7 +20,7 @@ model Account {
   id_token                 String?
   session_state            String?
   refresh_token_expires_in Int?
-  accessToken              String?
+  access_token              String?
   user                     User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
@@ -43,16 +43,20 @@ model VerificationToken {
 }
 
 model User {
-  id            String     @id @default(cuid())
+  id            String    @id @default(cuid())
   name          String?
-  address       String     @unique
-  email         String?    @unique
+  email         String?   @unique
+  image         String?
   emailVerified DateTime?
-  imageUrl         String?
   accounts      Account[]
-  campaigns     Campaign[]
-  donations     Donation[]
   sessions      Session[]
+}
+
+model PrivyUser {
+  id        String     @id @default(cuid())
+  address   String     @unique
+  campaigns Campaign[]
+  donations Donation[]
 }
 
 model Campaign {
@@ -64,29 +68,29 @@ model Campaign {
   githubRepoId     String          @map("github_repo_id")
   websiteUrl       String?         @map("website_url")
   status           CampaignStatus? @default(ACTIVE)
-  imageUrl         String          @map("image_url")
+  imageUrl         String?         @map("image_url")
   createdAt        DateTime        @default(now())
   updatedAt        DateTime        @default(now())
   userId           String
   endDate          DateTime        @map("end_date")
 
-  xmtpGroupId String? @map("xmtp_group_id")
+  xmtpGroupId     String? @map("xmtp_group_id")
   xmtpGroupLinkId String? @map("xmtp_group_link_id")
-  
-  user             User            @relation(fields: [userId], references: [id])
-  donations        Donation[]
+
+  user      PrivyUser  @relation(fields: [userId], references: [id])
+  donations Donation[]
 }
 
 model Donation {
-  id         Int      @id @default(autoincrement())
-  txHash     String   @unique
+  id         Int       @id @default(autoincrement())
+  txHash     String    @unique
   amount     Float
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @default(now())
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @default(now())
   userId     String
   campaignId Int
-  campaign   Campaign @relation(fields: [campaignId], references: [id])
-  user       User     @relation(fields: [userId], references: [id])
+  campaign   Campaign  @relation(fields: [campaignId], references: [id])
+  user       PrivyUser @relation(fields: [userId], references: [id])
 }
 
 enum CampaignStatus {
