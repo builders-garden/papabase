@@ -39,7 +39,7 @@ export const fetchNftTokenBalance = async (
   campaignId: number
 ): Promise<{ balance: string | number; totalSupply: string | number }> => {
   const { data, error }: QueryResponse = await fetchQuery(query, {
-    owner,
+    owner: "0x0881c47b66fe64da6ecd297af38c2848f0ffbbf4",
     token,
   });
   if (error || !data) {
@@ -48,6 +48,7 @@ export const fetchNftTokenBalance = async (
   const tokenBalances = data.TokenBalances?.TokenBalance?.filter(
     (t) => t.tokenId?.toString() === campaignId.toString()
   );
+  console.log(tokenBalances);
   return {
     balance: tokenBalances ? tokenBalances[0]?.amount! : 0,
     totalSupply: data.Tokens?.Token ? data.Tokens.Token[0]?.totalSupply! : 0,

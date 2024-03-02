@@ -55,7 +55,7 @@ export const getCampaigns = async () => {
 };
 
 export const getCampaignsByXMTPGroupId = async (groupId: string) => {
-  return await prisma.campaign.findUnique({
+  return await prisma.campaign.findFirst({
     where: { xmtpGroupId: groupId },
   });
 };
