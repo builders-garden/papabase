@@ -1,13 +1,10 @@
-import { PAPABASE_ABI } from "@/lib/contracts/abi";
 import { NextRequest, NextResponse } from "next/server";
-import { decodeEventLog, http } from "viem";
 import {
   DONATION_EVENT_TOPIC,
   Transaction,
   WITHDRAW_EVENT_TOPIC,
   processDonationEvent,
   processWithdrawEvent,
-  sendMessageInCampaign,
 } from "./utils";
 
 export async function POST(
