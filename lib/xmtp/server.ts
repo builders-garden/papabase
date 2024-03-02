@@ -4,7 +4,7 @@ import { GroupsClient } from "./client";
 const CONVERSE_GROUP_LINK_ENDPOINT =
   "https://backend-staging.converse.xyz/api/groups/create";
 
-const WEBHOOK_URL = `${BASE_URL}/groups/webhook`;
+const WEBHOOK_URL = `${BASE_URL}/api/groups/webhook`;
 
 export async function addGroupMember(
   client: GroupsClient,
