@@ -1,5 +1,7 @@
 import { PAPABASE_ABI } from "@/lib/contracts/abi";
 import { getCampaignById } from "@/lib/db/campaign";
+import { createDonation } from "@/lib/db/donation";
+import { getUserByAddress, getUserById } from "@/lib/db/user";
 import { createClient } from "@/lib/xmtp/client";
 import { sendMessageToGroup } from "@/lib/xmtp/server";
 import { decodeEventLog } from "viem";
@@ -62,6 +64,13 @@ export const processDonationEvent = async (event: Log) => {
       10
     )} by ${userAddress}!`
   );
+  const user = await getUserByAddress(userAddress);
+  await createDonation({
+    campaignId: parseInt(campaignId.toLocaleString(), 10),
+    userId: user?.id!,
+    amount: parseInt(depositAmount.toLocaleString(), 10),
+    txHash: event.transactionHash,
+  });
   await sendMessageInCampaign(
     parseInt(campaignId.toLocaleString(), 10),
     `New donation of ${parseInt(
