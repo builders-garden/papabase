@@ -11,7 +11,7 @@ import type {
 // You must download an appropriate binary for your system's architecture
 const BINARY_PATH =
   process.env.NODE_ENV === "production"
-    ? "./cli-binary-linux"
+    ? process.cwd() + "/cli-binary-linux"
     : "./cli-binary-macos";
 
 export async function createClient(dbPath: string) {
