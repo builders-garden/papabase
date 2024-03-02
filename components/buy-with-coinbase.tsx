@@ -16,7 +16,7 @@ export default function CoinbaseButton({
   useEffect(() => {
     //initOnRamp parameters
     const options: InitOnRampOptions = {
-      appId: "AppIdProvidedByCoinbase",
+      appId: "4cf9d8ee-7529-40a6-8c8e-7672ec71c3b9",
       target: "#cbpay-button-container",
       widgetParameters: {
         destinationWallets: [
@@ -40,8 +40,8 @@ export default function CoinbaseButton({
     };
 
     // instance.destroy() should be called before initOnramp if there is already an instance.
-    if (onrampInstance.current) {
-      onrampInstance.current.destroy();
+    if (onrampInstance.current && onrampInstance.current.destroy) {
+      onrampInstance.current?.destroy();
     }
 
     initOnRamp(options, (error, instance) => {
@@ -58,7 +58,7 @@ export default function CoinbaseButton({
 
   // render with button from previous example
   return (
-    <a id="cbpay-button-container" onClick={handleOnPress}>
+    <a id="cbpay-button-container" onClick={handleOnPress} ref={onrampInstance}>
       <img src="/buy-with-coinbase.png" />
     </a>
   );

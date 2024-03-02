@@ -2,6 +2,7 @@ import { CampaignStatus } from "@prisma/client";
 import { prisma } from "../prisma";
 
 export const createCampaign = async (data: {
+  id: number;
   userId: string;
   name: string;
   description: string;

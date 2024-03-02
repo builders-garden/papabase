@@ -4,12 +4,12 @@ import { chain } from "@/lib/constants";
 import { createContractCampaign } from "@/lib/contracts/papaBase-contract";
 import { Button, Input, Select, SelectItem, Textarea } from "@nextui-org/react";
 import { Octokit } from "@octokit/rest";
-import { useLogin, usePrivy } from "@privy-io/react-auth";
+import { useLogin, usePrivy, useWallets } from "@privy-io/react-auth";
 import { ArrowLeft, Check, Github } from "lucide-react";
 import { signIn, useSession } from "next-auth/react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { createWalletClient, http } from "viem";
+import { createWalletClient, custom } from "viem";
 
 export default function NewCampaignPage() {
   const [step, setStep] = useState<number>(0);
@@ -30,6 +30,7 @@ export default function NewCampaignPage() {
   const [loading, setLoading] = useState<boolean>(false);
   const [campaignId, setCampaignId] = useState<string>("");
   const [file, setFile] = useState<File | null>(null);
+  const { wallets } = useWallets();
 
   useEffect(() => {
     if (session && session?.user.accessToken) {
@@ -55,12 +56,11 @@ export default function NewCampaignPage() {
     try {
       const walletClient = createWalletClient({
         chain: chain,
-        account: user?.wallet?.address! as `0x${string}`,
-        transport: http(),
+        transport: custom(await wallets[0].getEthereumProvider()),
       });
       const endDate = Date.now() + parseInt(duration) * 24 * 60 * 60 * 1000;
 
-      await createContractCampaign(
+      const newCampaignId = await createContractCampaign(
         walletClient,
         user?.wallet?.address!,
         title,
@@ -71,6 +71,7 @@ export default function NewCampaignPage() {
       const repo = repos.find((repo: any) => repo.id === parseInt(value));
 
       const body = {
+        id: newCampaignId,
         name: title,
         description,
         recipientAddress: receiver,
@@ -86,11 +87,10 @@ export default function NewCampaignPage() {
         },
         body: JSON.stringify(body),
       });
-      const campaignId = (await res.json()).id;
-      setCampaignId(campaignId);
+      setCampaignId(newCampaignId);
       const formData = new FormData();
       formData.append("file", file!);
-      await fetch(`/api/campaigns/${campaignId}/image`, {
+      await fetch(`/api/campaigns/${newCampaignId}/image`, {
         method: "PUT",
         body: formData,
       });

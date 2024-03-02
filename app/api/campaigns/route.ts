@@ -19,6 +19,7 @@ export async function POST(
     const { userId } = verifiedClaims;
 
     const {
+      id,
       name,
       description,
       recipientAddress,
@@ -29,6 +30,7 @@ export async function POST(
     } = await req.json();
 
     if (
+      !id ||
       !name ||
       !description ||
       !recipientAddress ||
@@ -56,6 +58,7 @@ export async function POST(
       return new NextResponse("Failed to create XMTP group", { status: 500 });
     }
     const campaign = await createCampaign({
+      id,
       userId,
       name,
       description,

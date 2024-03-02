@@ -1,8 +1,11 @@
 "use client";
 import DonateModal from "@/components/donate-modal";
+import { PAPABASE_ADDRESS, chain } from "@/lib/constants";
+import { PAPABASE_ABI } from "@/lib/contracts/abi";
 import { Button, Link, Skeleton, useDisclosure } from "@nextui-org/react";
 import { usePrivy } from "@privy-io/react-auth";
 import { useEffect, useState } from "react";
+import { createPublicClient, http } from "viem";
 
 export default function DonateCampaign({
   params: { id },
@@ -12,6 +15,7 @@ export default function DonateCampaign({
   const [campaign, setCampaign] = useState<any | null>(null);
   const { user } = usePrivy();
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
+  const [amountRaised, setAmountRaised] = useState<number>(0);
 
   useEffect(() => {
     fetchCampaign();
@@ -21,6 +25,20 @@ export default function DonateCampaign({
     const response = await fetch(`/api/campaigns/${id}`);
     const data = await response.json();
     setCampaign(data);
+
+    const publicClient = createPublicClient({
+      chain: chain,
+      transport: http(),
+    });
+
+    const res = (await publicClient.readContract({
+      address: PAPABASE_ADDRESS,
+      abi: PAPABASE_ABI,
+      functionName: "campaigns",
+      args: [id],
+    })) as any[];
+    console.log(res[4]);
+    setAmountRaised(Number(res[4]) / 10 ** 6);
   };
 
   if (!campaign) {
@@ -75,11 +93,9 @@ export default function DonateCampaign({
               <h3 className="text-2xl md:text-3xl font-clash-display">
                 {campaign.name}
               </h3>
-              {user && campaign.userId !== user.id && (
-                <Button color="primary" onPress={() => onOpen()}>
-                  Donate
-                </Button>
-              )}
+              <Button color="primary" onPress={() => onOpen()}>
+                Donate
+              </Button>
               {/* {user && campaign.userId === user.id && (
                 <div className="flex flex-row space-x-2 items-center">
                   <Button color="primary">
@@ -117,13 +133,18 @@ export default function DonateCampaign({
         </div>
       </div>
       <h3 className="text-xl md:text-2xl">
-        <span className="font-clash-display">Amount raised:</span> $100.000
+        <span className="font-clash-display">Amount raised:</span> $
+        {amountRaised.toFixed(2)}
       </h3>
       <h3 className="text-xl md:text-2xl">
         <span className="font-clash-display">Donations</span>
       </h3>
       {campaign.donations.length === 0 && <p>No donations, yet!</p>}
-      <DonateModal isOpen={isOpen} onOpenChange={onOpenChange} />
+      <DonateModal
+        isOpen={isOpen}
+        onOpenChange={onOpenChange}
+        campaignId={campaign.id}
+      />
     </div>
   );
 }
