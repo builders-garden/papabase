@@ -1,5 +1,5 @@
-import { USDC_ADDRESS, chain } from "@/lib/constants";
-import { depositToCampaign } from "@/lib/contracts/papaBase-contract";
+import { PAPABASE_ADDRESS, USDC_ADDRESS, chain } from "@/lib/constants";
+import { PAPABASE_ABI } from "@/lib/contracts/abi";
 import { useSmartAccount } from "@/lib/hooks/smart-account-context";
 import {
   Modal,
@@ -13,7 +13,8 @@ import {
 } from "@nextui-org/react";
 import { usePrivy, useWallets } from "@privy-io/react-auth";
 import { useEffect, useState } from "react";
-import { createPublicClient, createWalletClient, custom, http } from "viem";
+import { createPublicClient, http } from "viem";
+import { useWriteContract } from "wagmi";
 
 export default function DonateModal({
   isOpen,
@@ -30,6 +31,7 @@ export default function DonateModal({
   const [amount, setAmount] = useState<number>(0);
   const res = useSmartAccount();
   const { wallets } = useWallets();
+  const { writeContractAsync, isPending } = useWriteContract();
 
   console.log(wallets);
 
@@ -74,28 +76,63 @@ export default function DonateModal({
   };
 
   const donate = async () => {
-    const wallet = wallets[0];
-    if (wallet) {
-      const walletClient = createWalletClient({
-        chain: chain,
-        transport: custom(await wallet.getEthereumProvider()),
-      });
+    const tx = await writeContractAsync({
+      address: USDC_ADDRESS,
+      abi: [
+        {
+          constant: false,
+          inputs: [
+            {
+              name: "_spender",
+              type: "address",
+            },
+            {
+              name: "_value",
+              type: "uint256",
+            },
+          ],
+          name: "approve",
+          outputs: [
+            {
+              name: "",
+              type: "bool",
+            },
+          ],
+          payable: false,
+          type: "function",
+        },
+      ],
+      functionName: "approve",
+      args: [PAPABASE_ADDRESS, BigInt(amount * 10 ** 6)],
+    });
 
-      //   await approveContract(
-      //     walletClient,
-      //     USDC_ADDRESS,
-      //     user?.wallet?.address!,
-      //     PAPABASE_ADDRESS,
-      //     BigInt(amount * 10 ** 6)
-      //   );
+    const publicClient = createPublicClient({
+      chain: chain,
+      transport: http(),
+    });
 
-      await depositToCampaign(
-        walletClient,
-        user?.wallet?.address!,
-        1,
-        BigInt(amount * 10 ** 6)
-      );
-    }
+    await publicClient.waitForTransactionReceipt({ hash: tx });
+
+    const depositTx = await writeContractAsync({
+      address: PAPABASE_ADDRESS,
+      abi: PAPABASE_ABI,
+      functionName: "depositFunds",
+      args: [campaignId, BigInt(amount * 10 ** 6)],
+    });
+
+    await publicClient.waitForTransactionReceipt({ hash: depositTx });
+
+    await fetch("/api/donations", {
+      method: "POST",
+      body: JSON.stringify({
+        userId: user?.id,
+        campaignId,
+        amount,
+        txHash: depositTx,
+      }),
+    });
+
+    onOpenChange(false);
   };
 
   return (

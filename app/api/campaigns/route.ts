@@ -30,7 +30,8 @@ export async function POST(
     } = await req.json();
 
     if (
-      !id ||
+      id === null ||
+      id === undefined ||
       !name ||
       !description ||
       !recipientAddress ||

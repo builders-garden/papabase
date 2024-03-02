@@ -68,3 +68,13 @@ export async function createGroupLink(
 
   return data;
 }
+
+export async function sendMessageToGroup(
+  client: GroupsClient,
+  groupId: string,
+  message: string
+): Promise<boolean> {
+  const res = await client.send(groupId, message);
+  console.log("Message sent", res);
+  return true;
+}

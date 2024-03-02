@@ -1,8 +1,17 @@
 "use client";
+import { sliceAddress } from "@/app/lib/utils";
 import DonateModal from "@/components/donate-modal";
 import { PAPABASE_ADDRESS, chain } from "@/lib/constants";
 import { PAPABASE_ABI } from "@/lib/contracts/abi";
-import { Button, Link, Skeleton, useDisclosure } from "@nextui-org/react";
+import {
+  Avatar,
+  Button,
+  Card,
+  CardHeader,
+  Link,
+  Skeleton,
+  useDisclosure,
+} from "@nextui-org/react";
 import { usePrivy } from "@privy-io/react-auth";
 import { useEffect, useState } from "react";
 import { createPublicClient, http } from "viem";
@@ -21,9 +30,17 @@ export default function DonateCampaign({
     fetchCampaign();
   }, []);
 
+  useEffect(() => {
+    if (!isOpen) {
+      fetchCampaign();
+    }
+  }, [isOpen]);
+
   const fetchCampaign = async () => {
     const response = await fetch(`/api/campaigns/${id}`);
     const data = await response.json();
+
+    console.log(data);
     setCampaign(data);
 
     const publicClient = createPublicClient({
@@ -37,8 +54,7 @@ export default function DonateCampaign({
       functionName: "campaigns",
       args: [id],
     })) as any[];
-    console.log(res[4]);
-    setAmountRaised(Number(res[4]) / 10 ** 6);
+    setAmountRaised(Number(res[3]) / 10 ** 6);
   };
 
   if (!campaign) {
@@ -140,6 +156,42 @@ export default function DonateCampaign({
         <span className="font-clash-display">Donations</span>
       </h3>
       {campaign.donations.length === 0 && <p>No donations, yet!</p>}
+      {campaign.donations.length > 0 && (
+        <div className="flex flex-col space-y-4">
+          {campaign.donations.map((donation: any) => (
+            <Card key={`donation-${donation.id}`}>
+              <CardHeader
+                className="justify-between cursor-pointer"
+                onClick={() => {
+                  typeof window !== undefined &&
+                    window.open(
+                      `${chain.blockExplorers.default.url}/tx/${donation.txHash}`,
+                      "_blank"
+                    );
+                }}
+              >
+                <div className="flex gap-5">
+                  <Avatar
+                    isBordered
+                    radius="full"
+                    size="md"
+                    title={donation.user.address}
+                  />
+                  <div className="flex flex-col gap-1 items-start justify-center">
+                    <h4 className="text-small font-semibold leading-none text-default-600">
+                      {sliceAddress(donation.user.address)} donated $
+                      {donation.amount}!
+                    </h4>
+                    <h5 className="text-small tracking-tight text-default-400">
+                      {donation.createdAt}
+                    </h5>
+                  </div>
+                </div>
+              </CardHeader>
+            </Card>
+          ))}
+        </div>
+      )}
       <DonateModal
         isOpen={isOpen}
         onOpenChange={onOpenChange}

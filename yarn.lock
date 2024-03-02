@@ -4273,6 +4273,11 @@
   resolved "https://registry.yarnpkg.com/@privy-io/wagmi-connector/-/wagmi-connector-0.1.12.tgz#18af76b32a44370c0bd6488b0a4d814712c66715"
   integrity sha512-sH082gTKOxu0WW1vlKykbkP5iuI67gYsk/lARywQz4QhV8eFoQZUTKSYZ0VCYdk7PPI4sX2vkDVJLtlDS6k6/w==
 
+"@privy-io/wagmi@^0.2.0":
+  version "0.2.0"
+  resolved "https://registry.yarnpkg.com/@privy-io/wagmi/-/wagmi-0.2.0.tgz#e91105c8620625bc99dd038e80190fa5b1434116"
+  integrity sha512-uocHzkrGK6pSQVTbxYiZXrlYTY1lXaOP06S2s7oD8JyE2XRFwwYMcVAcJhXXXqINs9n9Z0ZcJ9DuuJ+3rMHeYQ==
+
 "@protobufjs/aspromise@^1.1.1", "@protobufjs/aspromise@^1.1.2":
   version "1.1.2"
   resolved "https://registry.yarnpkg.com/@protobufjs/aspromise/-/aspromise-1.1.2.tgz#9b8b0cc663d669a7d8f6f5d0893a14d348f30fbf"
@@ -5814,6 +5819,18 @@
     "@babel/runtime" "^7.23.2"
     content-type "^1.0.5"
     tslib "^2.6.2"
+
+"@tanstack/query-core@5.24.1", "@tanstack/query-core@^5.24.1":
+  version "5.24.1"
+  resolved "https://registry.yarnpkg.com/@tanstack/query-core/-/query-core-5.24.1.tgz#d40928dec22b47df97fb2648e8c499772e8d7eb2"
+  integrity sha512-DZ6Nx9p7BhjkG50ayJ+MKPgff+lMeol7QYXkvuU5jr2ryW/4ok5eanaS9W5eooA4xN0A/GPHdLGOZGzArgf5Cg==
+
+"@tanstack/react-query@^5.24.1":
+  version "5.24.1"
+  resolved "https://registry.yarnpkg.com/@tanstack/react-query/-/react-query-5.24.1.tgz#bcb913febe0d813cec1fda7783298d07aa998b20"
+  integrity sha512-4+09JEdO4d6+Gc8Y/g2M/MuxDK5IY0QV8+2wL2304wPKJgJ54cBbULd3nciJ5uvh/as8rrxx6s0mtIwpRuGd1g==
+  dependencies:
+    "@tanstack/query-core" "5.24.1"
 
 "@tanstack/react-virtual@^3.0.0-beta.60":
   version "3.1.3"

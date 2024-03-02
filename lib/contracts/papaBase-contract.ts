@@ -7,13 +7,12 @@ export const createContractCampaign = async (
   client: WalletClient,
   account: string,
   name: string,
-  description: string,
   endDate: number
 ) => {
   return await client.writeContract({
     address: PAPABASE_ADDRESS as `0x${string}`,
     functionName: "createCampaign",
-    args: [name, description, endDate],
+    args: [name, endDate],
     abi: PAPABASE_ABI,
     account: account as `0x${string}`,
     chain: chain,

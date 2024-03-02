@@ -1,15 +1,15 @@
 "use client";
 import { sliceAddress } from "@/app/lib/utils";
-import { chain } from "@/lib/constants";
-import { createContractCampaign } from "@/lib/contracts/papaBase-contract";
+import { PAPABASE_ADDRESS } from "@/lib/constants";
+import { PAPABASE_ABI } from "@/lib/contracts/abi";
 import { Button, Input, Select, SelectItem, Textarea } from "@nextui-org/react";
 import { Octokit } from "@octokit/rest";
-import { useLogin, usePrivy, useWallets } from "@privy-io/react-auth";
+import { useLogin, usePrivy } from "@privy-io/react-auth";
 import { ArrowLeft, Check, Github } from "lucide-react";
 import { signIn, useSession } from "next-auth/react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { createWalletClient, custom } from "viem";
+import { useReadContract, useWriteContract } from "wagmi";
 
 export default function NewCampaignPage() {
   const [step, setStep] = useState<number>(0);
@@ -28,9 +28,14 @@ export default function NewCampaignPage() {
   const [value, setValue] = useState<any>(null);
   const [duration, setDuration] = useState<any>("30");
   const [loading, setLoading] = useState<boolean>(false);
-  const [campaignId, setCampaignId] = useState<string>("");
+  const [campaignId, setCampaignId] = useState<number>(0);
   const [file, setFile] = useState<File | null>(null);
-  const { wallets } = useWallets();
+  const { data: campaignCount, refetch } = useReadContract({
+    address: PAPABASE_ADDRESS,
+    abi: PAPABASE_ABI,
+    functionName: "campaignCount",
+  });
+  const { writeContractAsync } = useWriteContract({});
 
   useEffect(() => {
     if (session && session?.user.accessToken) {
@@ -54,19 +59,17 @@ export default function NewCampaignPage() {
   const createCampaign = async () => {
     setLoading(true);
     try {
-      const walletClient = createWalletClient({
-        chain: chain,
-        transport: custom(await wallets[0].getEthereumProvider()),
-      });
       const endDate = Date.now() + parseInt(duration) * 24 * 60 * 60 * 1000;
 
-      const newCampaignId = await createContractCampaign(
-        walletClient,
-        user?.wallet?.address!,
-        title,
-        description,
-        endDate
-      );
+      await writeContractAsync({
+        address: PAPABASE_ADDRESS,
+        abi: PAPABASE_ABI,
+        functionName: "createCampaign",
+        args: [title, endDate],
+      });
+
+      await refetch();
+      const newCampaignId = Number(campaignCount) - 1;
 
       const repo = repos.find((repo: any) => repo.id === parseInt(value));
 
@@ -80,7 +83,7 @@ export default function NewCampaignPage() {
         githubRepoUrl: repo.url,
         endDate,
       };
-      const res = await fetch("/api/campaigns", {
+      await fetch("/api/campaigns", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
