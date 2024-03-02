@@ -1,6 +1,6 @@
 "use client";
 import { sliceAddress } from "@/app/lib/utils";
-import { PAPABASE_ADDRESS } from "@/lib/constants";
+import { PAPABASE_ADDRESS, chain } from "@/lib/constants";
 import { PAPABASE_ABI } from "@/lib/contracts/abi";
 import { Button, Input, Select, SelectItem, Textarea } from "@nextui-org/react";
 import { Octokit } from "@octokit/rest";
@@ -9,6 +9,7 @@ import { ArrowLeft, Check, Github } from "lucide-react";
 import { signIn, useSession } from "next-auth/react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { createPublicClient, http } from "viem";
 import { useReadContract, useWriteContract } from "wagmi";
 
 export default function NewCampaignPage() {
@@ -59,13 +60,21 @@ export default function NewCampaignPage() {
   const createCampaign = async () => {
     setLoading(true);
     try {
+      const publicClient = createPublicClient({
+        chain: chain,
+        transport: http(),
+      });
       const endDate = Date.now() + parseInt(duration) * 24 * 60 * 60 * 1000;
 
-      await writeContractAsync({
+      const tx = await writeContractAsync({
         address: PAPABASE_ADDRESS,
         abi: PAPABASE_ABI,
         functionName: "createCampaign",
         args: [title, endDate],
+      });
+
+      await publicClient.waitForTransactionReceipt({
+        hash: tx as `0x${string}`,
       });
 
       await refetch();
