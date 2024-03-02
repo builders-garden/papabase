@@ -66,8 +66,6 @@ export default function DonateModal({
   const [recurring, setRecurring] = useState<boolean>(false);
   const { sendTransaction } = useSendTransaction();
 
-  console.log(wallets);
-
   useEffect(() => {
     if (isOpen && user && token) {
       fetchBalance();
