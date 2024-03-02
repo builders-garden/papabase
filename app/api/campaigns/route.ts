@@ -4,6 +4,8 @@ import { createClient } from "@/lib/xmtp/client";
 import { createGroupLink } from "@/lib/xmtp/server";
 import { privy } from "@/app/lib/privy";
 
+export const maxDuration = 300;
+
 export async function POST(
   req: NextRequest,
   res: NextResponse
