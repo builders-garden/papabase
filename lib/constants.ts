@@ -1,4 +1,4 @@
-import { baseSepolia } from "viem/chains";
+import { base } from "viem/chains";
 
 export const BASE_URL = "https://papabase.builders.garden";
 export const SMART_ACCOUNT_FACTORY_ADDRESS =
@@ -8,9 +8,8 @@ export const BASE_ENTRYPOINT_ADDRESS =
 export const ACROSS_ADDRESS_POLYGON =
   "0x9295ee1d8C5b022Be115A2AD3c30C72E34e7F096";
 
-export const PAPABASE_ADDRESS = "0x942af163168A6CDed16Df6Df8b125F0278aa2976";
-export const USDC_ADDRESS = "0x036CbD53842c5426634e7929541eC2318f3dCF7e";
-export const BASE_SCAN_URL = "https://sepolia.basescan.org";
-export const chain = baseSepolia;
-// export const BASE_SCAN_URL = "https://basescan.org";
-// export const chain = base;
+export const PAPABASE_ADDRESS = "0xa64f7ca0d62f78d18b44ac653e79c45a169eafa2";
+// export const BASE_SCAN_URL = "https://sepolia.basescan.org";
+// export const chain = baseSepolia;
+export const BASE_SCAN_URL = "https://basescan.org";
+export const chain = base;

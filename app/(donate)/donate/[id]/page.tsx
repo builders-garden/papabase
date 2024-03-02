@@ -27,10 +27,12 @@ export default function DonateCampaign({
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
   const [amountRaised, setAmountRaised] = useState<number>(0);
   const [isDonor, setIsDonor] = useState<boolean>(false);
-  console.log(isDonor);
+
   useEffect(() => {
-    fetchCampaign();
-  }, []);
+    if (user) {
+      fetchCampaign();
+    }
+  }, [user]);
 
   useEffect(() => {
     if (!isOpen) {
@@ -42,7 +44,9 @@ export default function DonateCampaign({
     const response = await fetch(`/api/campaigns/${id}`);
     const data = await response.json();
 
-    console.log(data);
+    console.log(
+      data.donations.some((donation: any) => donation.userId === user?.id)
+    );
     setCampaign(data);
 
     setIsDonor(
