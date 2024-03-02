@@ -53,3 +53,9 @@ export const getCampaigns = async () => {
     include: { donations: true, user: true },
   });
 };
+
+export const getCampaignsByXMTPGroupId = async (groupId: string) => {
+  return await prisma.campaign.findUnique({
+    where: { xmtpGroupId: groupId },
+  });
+};

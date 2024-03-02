@@ -12,6 +12,7 @@ const query = /* GraphQL */ `
       }
     ) {
       TokenBalance {
+        tokenId
         amount
       }
     }
@@ -34,7 +35,8 @@ interface Error {
 
 export const fetchNftTokenBalance = async (
   owner: string,
-  token: string
+  token: string,
+  campaignId: number
 ): Promise<{ balance: string | number; totalSupply: string | number }> => {
   const { data, error }: QueryResponse = await fetchQuery(query, {
     owner,
@@ -43,10 +45,11 @@ export const fetchNftTokenBalance = async (
   if (error || !data) {
     throw new Error(`Error fetching token balance: ${error?.message}`);
   }
+  const tokenBalances = data.TokenBalances?.TokenBalance?.filter(
+    (t) => t.tokenId?.toString() === campaignId.toString()
+  );
   return {
-    balance: data.TokenBalances?.TokenBalance
-      ? data.TokenBalances.TokenBalance[0]?.amount!
-      : 0,
+    balance: tokenBalances ? tokenBalances[0]?.amount! : 0,
     totalSupply: data.Tokens?.Token ? data.Tokens.Token[0]?.totalSupply! : 0,
   };
 };

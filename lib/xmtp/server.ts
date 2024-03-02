@@ -26,12 +26,15 @@ export async function addGroupMember(
 
 export async function shouldAddGroupMember(
   groupId: string,
+  campaignId: number,
   accountAddress: string
 ): Promise<boolean> {
   const nftBalance = await fetchNftTokenBalance(
     accountAddress,
-    PAPABASE_ADDRESS
+    PAPABASE_ADDRESS,
+    campaignId
   );
+
   return parseInt(nftBalance.balance as string, 10) > 0;
 }
 

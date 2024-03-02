@@ -1,3 +1,4 @@
+import { getCampaignsByXMTPGroupId } from "@/lib/db/campaign";
 import { createClient } from "@/lib/xmtp/client";
 import { addGroupMember, shouldAddGroupMember } from "@/lib/xmtp/server";
 import { NextResponse, NextRequest } from "next/server";
@@ -13,7 +14,9 @@ export async function POST(
     `Received a join query for groupId ${groupId} - wallet ${walletAddress}`
   );
 
-  if (await shouldAddGroupMember(groupId, walletAddress)) {
+  const campaign = await getCampaignsByXMTPGroupId(groupId);
+
+  if (await shouldAddGroupMember(groupId, campaign!.id!, walletAddress)) {
     try {
       await addGroupMember(groupsClient, groupId, walletAddress);
       return NextResponse.json({

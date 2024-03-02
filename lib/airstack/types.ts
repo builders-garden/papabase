@@ -129,6 +129,13 @@ export type Boolean_Comparator_Exp = {
   _eq: InputMaybe<Scalars['Boolean']['input']>;
 };
 
+export type ConnectedAddress = {
+  address: Maybe<Scalars['Address']['output']>;
+  blockchain: Maybe<Scalars['String']['output']>;
+  chainId: Maybe<Scalars['String']['output']>;
+  timestamp: Maybe<Scalars['Time']['output']>;
+};
+
 export type ContractMetadata = {
   /** Description of the token, mirrored from the smart contract */
   description: Maybe<Scalars['String']['output']>;
@@ -959,6 +966,7 @@ export type Social = {
   blockchain: Maybe<Blockchain>;
   /** Unique identifier for the blockchain */
   chainId: Maybe<Scalars['String']['output']>;
+  connectedAddresses: Maybe<Array<ConnectedAddress>>;
   coverImageContentValue: Maybe<Media>;
   coverImageURI: Maybe<Scalars['String']['output']>;
   /** Social DApp name */
@@ -1712,7 +1720,7 @@ export type NftTokenBalanceQueryVariables = Exact<{
 }>;
 
 
-export type NftTokenBalanceQuery = { TokenBalances: { TokenBalance: Array<{ amount: string }> | null } | null, Tokens: { Token: Array<{ totalSupply: string | null }> | null } | null };
+export type NftTokenBalanceQuery = { TokenBalances: { TokenBalance: Array<{ tokenId: string | null, amount: string }> | null } | null, Tokens: { Token: Array<{ totalSupply: string | null }> | null } | null };
 
 export type GetAllSocialsQueryVariables = Exact<{
   address: Scalars['Address']['input'];
