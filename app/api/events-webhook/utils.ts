@@ -73,8 +73,8 @@ export const processDonationEvent = async (event: Log) => {
   });
   await sendMessageInCampaign(
     parseInt(campaignId.toLocaleString(), 10),
-    `New donation of ${parseInt(
-      campaignId.toLocaleString(),
+    `New donation of $${parseInt(
+      depositAmount.toLocaleString(),
       10
     )} by ${userAddress}!`
   );
@@ -91,7 +91,7 @@ export const processWithdrawEvent = async (event: Log) => {
   });
   const { campaignId, withdrawAmount } = data.args as any;
   console.log(
-    `New withdraw for campaign "${campaignId.toLocaleString()}" of ${parseInt(
+    `New withdraw for campaign "${campaignId.toLocaleString()}" of $${parseInt(
       withdrawAmount.toLocaleString(),
       10
     )}!`
