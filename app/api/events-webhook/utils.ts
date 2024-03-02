@@ -76,7 +76,7 @@ export const processDonationEvent = async (event: Log) => {
     `New donation of $${parseInt(
       depositAmount.toLocaleString(),
       10
-    )} by ${userAddress}!`
+    )} by ${userAddress}!\n\nhttps://basescan.org/tx/${event.transactionHash}`
   );
 };
 
@@ -98,6 +98,9 @@ export const processWithdrawEvent = async (event: Log) => {
   );
   await sendMessageInCampaign(
     parseInt(campaignId.toLocaleString(), 10),
-    `New withdraw of ${parseInt(withdrawAmount.toLocaleString(), 10)}!`
+    `New withdraw of ${parseInt(
+      withdrawAmount.toLocaleString(),
+      10
+    )}!\n\nhttps://basescan.org/tx/${event.transactionHash}`
   );
 };
