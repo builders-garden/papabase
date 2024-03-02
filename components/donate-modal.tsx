@@ -21,10 +21,10 @@ import {
   Select,
   SelectItem,
 } from "@nextui-org/react";
-import { usePrivy, useSendTransaction, useWallets } from "@privy-io/react-auth";
+import { usePrivy, useWallets } from "@privy-io/react-auth";
 import { useEffect, useState } from "react";
 import { createPublicClient, http } from "viem";
-import { useWriteContract } from "wagmi";
+import { useSendTransaction, useWriteContract } from "wagmi";
 
 export default function DonateModal({
   isOpen,
@@ -39,10 +39,6 @@ export default function DonateModal({
     {
       name: Token.USDC,
       address: getTokenAddress(Token.USDC),
-    },
-    {
-      name: Token.USDT,
-      address: getTokenAddress(Token.USDT),
     },
     {
       name: Token.DAI,
@@ -64,7 +60,7 @@ export default function DonateModal({
   const { smartAccountAddress, smartAccountClient } = useSmartAccount();
   const { writeContractAsync } = useWriteContract({});
   const [recurring, setRecurring] = useState<boolean>(false);
-  const { sendTransaction } = useSendTransaction();
+  const { sendTransactionAsync } = useSendTransaction();
 
   useEffect(() => {
     if (isOpen && user && token) {
@@ -135,6 +131,7 @@ export default function DonateModal({
 
     const multiplier = recurring ? 3 : 1;
     const depositAmount = BigInt(amount * multiplier * 10 ** decimals);
+    const usdcDepositAmount = BigInt(amount * multiplier * 10 ** 6);
 
     if (token !== TokenAddress.USDC) {
       const { to, data } = await getSwapQuote(
@@ -142,6 +139,7 @@ export default function DonateModal({
         TokenAddress.USDC,
         amount * multiplier * 10 ** 18
       );
+      console.log(to, data);
 
       let approve0xTx: `0x${string}` = "0x";
       if (smartAccountClient) {
@@ -220,12 +218,10 @@ export default function DonateModal({
           data: data as `0x${string}`,
         });
       } else {
-        tx = (
-          await sendTransaction({
-            to,
-            data,
-          })
-        ).transactionHash as `0x${string}`;
+        tx = (await sendTransactionAsync({
+          to: to as `0x${string}`,
+          data: data as `0x${string}`,
+        })) as `0x${string}`;
       }
 
       await publicClient.waitForTransactionReceipt({
@@ -238,7 +234,7 @@ export default function DonateModal({
       txHash = await smartAccountClient.writeContract({
         chain: chain,
         account: smartAccountAddress!,
-        address: token as `0x${string}`,
+        address: TokenAddress.USDC,
         abi: [
           {
             constant: false,
@@ -264,11 +260,11 @@ export default function DonateModal({
           },
         ],
         functionName: "approve",
-        args: [PAPABASE_ADDRESS, depositAmount],
+        args: [PAPABASE_ADDRESS, usdcDepositAmount],
       });
     } else {
       txHash = await writeContractAsync({
-        address: token as `0x${string}`,
+        address: TokenAddress.USDC,
         abi: [
           {
             constant: false,
@@ -294,14 +290,14 @@ export default function DonateModal({
           },
         ],
         functionName: "approve",
-        args: [PAPABASE_ADDRESS, depositAmount],
+        args: [PAPABASE_ADDRESS, usdcDepositAmount],
       });
     }
 
     await publicClient.waitForTransactionReceipt({ hash: txHash });
 
     let depositTx: `0x${string}` = "0x";
-    if (recurring) {
+    if (!recurring) {
       if (smartAccountClient) {
         depositTx = await smartAccountClient.writeContract({
           account: smartAccountAddress!,
@@ -309,14 +305,14 @@ export default function DonateModal({
           address: PAPABASE_ADDRESS,
           abi: PAPABASE_ABI,
           functionName: "depositFunds",
-          args: [campaignId, depositAmount],
+          args: [campaignId, usdcDepositAmount],
         });
       } else {
         depositTx = await writeContractAsync({
           address: PAPABASE_ADDRESS,
           abi: PAPABASE_ABI,
           functionName: "depositFunds",
-          args: [campaignId, depositAmount],
+          args: [campaignId, usdcDepositAmount],
         });
       }
     } else {
@@ -331,7 +327,7 @@ export default function DonateModal({
           args: [
             user?.wallet?.address,
             campaignId,
-            depositAmount,
+            usdcDepositAmount,
             3,
             monthInSeconds,
           ],
@@ -344,7 +340,7 @@ export default function DonateModal({
           args: [
             user?.wallet?.address,
             campaignId,
-            depositAmount,
+            usdcDepositAmount,
             3,
             monthInSeconds,
           ],
@@ -390,12 +386,6 @@ export default function DonateModal({
                       value={TokenAddress.USDC}
                     >
                       {Token.USDC}
-                    </SelectItem>
-                    <SelectItem
-                      key={TokenAddress.USDT}
-                      value={TokenAddress.USDT}
-                    >
-                      {Token.USDT}
                     </SelectItem>
                     <SelectItem key={TokenAddress.DAI} value={TokenAddress.DAI}>
                       {Token.DAI}
