@@ -5,5 +5,5 @@ export const getUserById = async (id: string) => {
 };
 
 export const getUserByAddress = async (address: string) => {
-  return await prisma.user.findUnique({ where: { address } });
+  return await prisma.privyUser.findUnique({ where: { address } });
 };
