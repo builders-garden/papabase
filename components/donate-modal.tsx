@@ -6,6 +6,7 @@ import {
 } from "@/lib/0xapi";
 import { PAPABASE_ADDRESS, chain } from "@/lib/constants";
 import { PAPABASE_ABI } from "@/lib/contracts/abi";
+import { useSmartAccount } from "@/lib/hooks/smart-account-context";
 import { generateOnRampURL } from "@coinbase/cbpay-js";
 import {
   Modal,
@@ -59,7 +60,9 @@ export default function DonateModal({
   const [loading, setLoading] = useState<boolean>(false);
   const [amount, setAmount] = useState<number>(0);
   const { wallets } = useWallets();
-  const { writeContractAsync } = useWriteContract();
+
+  const { smartAccountAddress, smartAccountClient } = useSmartAccount();
+  const { writeContractAsync } = useWriteContract({});
   const [recurring, setRecurring] = useState<boolean>(false);
   const { sendTransaction } = useSendTransaction();
 
@@ -142,7 +145,101 @@ export default function DonateModal({
         amount * multiplier * 10 ** 18
       );
 
-      const approve0xTx = await writeContractAsync({
+      let approve0xTx: `0x${string}` = "0x";
+      if (smartAccountClient) {
+        approve0xTx = await smartAccountClient.writeContract({
+          chain: chain,
+          account: smartAccountAddress!,
+          address: token as `0x${string}`,
+          abi: [
+            {
+              constant: false,
+              inputs: [
+                {
+                  name: "_spender",
+                  type: "address",
+                },
+                {
+                  name: "_value",
+                  type: "uint256",
+                },
+              ],
+              name: "approve",
+              outputs: [
+                {
+                  name: "",
+                  type: "bool",
+                },
+              ],
+              payable: false,
+              type: "function",
+            },
+          ],
+          functionName: "approve",
+          args: [to, depositAmount],
+        });
+      } else {
+        approve0xTx = await writeContractAsync({
+          address: token as `0x${string}`,
+          abi: [
+            {
+              constant: false,
+              inputs: [
+                {
+                  name: "_spender",
+                  type: "address",
+                },
+                {
+                  name: "_value",
+                  type: "uint256",
+                },
+              ],
+              name: "approve",
+              outputs: [
+                {
+                  name: "",
+                  type: "bool",
+                },
+              ],
+              payable: false,
+              type: "function",
+            },
+          ],
+          functionName: "approve",
+          args: [to, depositAmount],
+        });
+      }
+
+      await publicClient.waitForTransactionReceipt({ hash: approve0xTx });
+
+      let tx: `0x${string}` = "0x";
+
+      if (smartAccountClient) {
+        tx = await smartAccountClient.sendTransaction({
+          chain: chain,
+          account: smartAccountAddress!,
+          to: to as `0x${string}`,
+          data: data as `0x${string}`,
+        });
+      } else {
+        tx = (
+          await sendTransaction({
+            to,
+            data,
+          })
+        ).transactionHash as `0x${string}`;
+      }
+
+      await publicClient.waitForTransactionReceipt({
+        hash: tx as `0x${string}`,
+      });
+    }
+
+    let txHash: `0x${string}` = "0x";
+    if (smartAccountClient) {
+      txHash = await smartAccountClient.writeContract({
+        chain: chain,
+        account: smartAccountAddress!,
         address: token as `0x${string}`,
         abi: [
           {
@@ -169,75 +266,92 @@ export default function DonateModal({
           },
         ],
         functionName: "approve",
-        args: [to, depositAmount],
+        args: [PAPABASE_ADDRESS, depositAmount],
       });
-
-      await publicClient.waitForTransactionReceipt({ hash: approve0xTx });
-
-      const tx = await sendTransaction({
-        to,
-        data,
-      });
-
-      await publicClient.waitForTransactionReceipt({
-        hash: tx.transactionHash as `0x${string}`,
+    } else {
+      txHash = await writeContractAsync({
+        address: token as `0x${string}`,
+        abi: [
+          {
+            constant: false,
+            inputs: [
+              {
+                name: "_spender",
+                type: "address",
+              },
+              {
+                name: "_value",
+                type: "uint256",
+              },
+            ],
+            name: "approve",
+            outputs: [
+              {
+                name: "",
+                type: "bool",
+              },
+            ],
+            payable: false,
+            type: "function",
+          },
+        ],
+        functionName: "approve",
+        args: [PAPABASE_ADDRESS, depositAmount],
       });
     }
 
-    const tx = await writeContractAsync({
-      address: token as `0x${string}`,
-      abi: [
-        {
-          constant: false,
-          inputs: [
-            {
-              name: "_spender",
-              type: "address",
-            },
-            {
-              name: "_value",
-              type: "uint256",
-            },
-          ],
-          name: "approve",
-          outputs: [
-            {
-              name: "",
-              type: "bool",
-            },
-          ],
-          payable: false,
-          type: "function",
-        },
-      ],
-      functionName: "approve",
-      args: [PAPABASE_ADDRESS, depositAmount],
-    });
-
-    await publicClient.waitForTransactionReceipt({ hash: tx });
+    await publicClient.waitForTransactionReceipt({ hash: txHash });
 
     let depositTx: `0x${string}` = "0x";
     if (recurring) {
-      depositTx = await writeContractAsync({
-        address: PAPABASE_ADDRESS,
-        abi: PAPABASE_ABI,
-        functionName: "depositFunds",
-        args: [campaignId, depositAmount],
-      });
+      if (smartAccountClient) {
+        depositTx = await smartAccountClient.writeContract({
+          account: smartAccountAddress!,
+          chain,
+          address: PAPABASE_ADDRESS,
+          abi: PAPABASE_ABI,
+          functionName: "depositFunds",
+          args: [campaignId, depositAmount],
+        });
+      } else {
+        depositTx = await writeContractAsync({
+          address: PAPABASE_ADDRESS,
+          abi: PAPABASE_ABI,
+          functionName: "depositFunds",
+          args: [campaignId, depositAmount],
+        });
+      }
     } else {
       const monthInSeconds = 60 * 60 * 24 * 30;
-      depositTx = await writeContractAsync({
-        address: PAPABASE_ADDRESS,
-        abi: PAPABASE_ABI,
-        functionName: "depositFundsRecurring",
-        args: [
-          user?.wallet?.address,
-          campaignId,
-          depositAmount,
-          3,
-          monthInSeconds,
-        ],
-      });
+      if (smartAccountClient) {
+        depositTx = await smartAccountClient.writeContract({
+          account: smartAccountAddress!,
+          chain,
+          address: PAPABASE_ADDRESS,
+          abi: PAPABASE_ABI,
+          functionName: "depositFundsRecurring",
+          args: [
+            user?.wallet?.address,
+            campaignId,
+            depositAmount,
+            3,
+            monthInSeconds,
+          ],
+        });
+      } else {
+        depositTx = await writeContractAsync({
+          address: PAPABASE_ADDRESS,
+          abi: PAPABASE_ABI,
+          functionName: "depositFundsRecurring",
+          args: [
+            user?.wallet?.address,
+            campaignId,
+            depositAmount,
+            3,
+            monthInSeconds,
+          ],
+        });
+      }
     }
 
     await publicClient.waitForTransactionReceipt({ hash: depositTx });
