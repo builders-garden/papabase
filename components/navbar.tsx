@@ -45,12 +45,12 @@ export default function Navbar() {
               </Button>
             </DropdownTrigger>
             <DropdownMenu aria-label="Dynamic Actions">
-              <DropdownItem key={"profile"} color={"primary"} className={""}>
+              {/* <DropdownItem key={"profile"} color={"primary"} className={""}>
                 Profile
               </DropdownItem>
               <DropdownItem key={"donations"} color={"primary"} className={""}>
                 Donations
-              </DropdownItem>
+              </DropdownItem> */}
               <DropdownItem
                 key={"logout"}
                 color={"danger"}

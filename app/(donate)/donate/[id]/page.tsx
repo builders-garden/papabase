@@ -7,6 +7,7 @@ import {
   Avatar,
   Button,
   Card,
+  CardBody,
   CardHeader,
   Link,
   Skeleton,
@@ -25,7 +26,8 @@ export default function DonateCampaign({
   const { user } = usePrivy();
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
   const [amountRaised, setAmountRaised] = useState<number>(0);
-
+  const [isDonor, setIsDonor] = useState<boolean>(false);
+  console.log(isDonor);
   useEffect(() => {
     fetchCampaign();
   }, []);
@@ -42,6 +44,10 @@ export default function DonateCampaign({
 
     console.log(data);
     setCampaign(data);
+
+    setIsDonor(
+      data.donations.some((donation: any) => donation.userId === user?.id)
+    );
 
     const publicClient = createPublicClient({
       chain: chain,
@@ -135,19 +141,35 @@ export default function DonateCampaign({
             </div>
             <h3 className="text-lg">
               <span className="font-clash-display">Github repo: </span>
-              <Link href={campaign.githubRepoUrl}>
+              <Link isExternal href={campaign.githubRepoUrl}>
                 {campaign.githubRepoUrl}
               </Link>
             </h3>
             {campaign.websiteUrl && (
               <h3 className="text-lg">
                 <span className="font-clash-display">Website: </span>
-                <Link href={campaign.websiteUrl}>{campaign.websiteUrl}</Link>
+                <Link isExternal href={campaign.websiteUrl}>
+                  {campaign.websiteUrl}
+                </Link>
               </h3>
             )}
           </div>
         </div>
       </div>
+      {isDonor && (
+        <Card>
+          <CardBody className="bg-success text-white">
+            <h3>
+              Thank you for donating to this campaign! You are awesome! 🎉 Enter
+              your token-gated chat{" "}
+              <Link href={campaign.xmtpGroupLinkId} isExternal>
+                here
+              </Link>
+              .
+            </h3>
+          </CardBody>
+        </Card>
+      )}
       <h3 className="text-xl md:text-2xl">
         <span className="font-clash-display">Amount raised:</span> $
         {amountRaised.toFixed(2)}
