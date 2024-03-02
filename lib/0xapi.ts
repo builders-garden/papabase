@@ -46,15 +46,15 @@ interface Quote {
 }
 
 export const getSwapQuote = async (
-  sellToken: Token,
-  buyToken: Token,
+  sellToken: TokenAddress,
+  buyToken: TokenAddress,
   sellAmountWei: number,
   chain: Chain = Chain.BASE
 ): Promise<Quote> => {
   const response = await fetch(
-    `${API_URL(chain)}/swap/v1/quote?sellToken=${getTokenAddress(
-      sellToken
-    )}&buyToken=${getTokenAddress(buyToken)}&sellAmount=${sellAmountWei}`,
+    `${API_URL(
+      chain
+    )}/swap/v1/quote?sellToken=${sellToken}&buyToken=${buyToken}&sellAmount=${sellAmountWei}`,
     {
       headers: {
         "0x-api-key": process.env.ZERO_X_API_KEY!,

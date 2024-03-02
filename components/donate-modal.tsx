@@ -1,6 +1,11 @@
-import { PAPABASE_ADDRESS, USDC_ADDRESS, chain } from "@/lib/constants";
+import {
+  Token,
+  TokenAddress,
+  getSwapQuote,
+  getTokenAddress,
+} from "@/lib/0xapi";
+import { PAPABASE_ADDRESS, chain } from "@/lib/constants";
 import { PAPABASE_ABI } from "@/lib/contracts/abi";
-import { useSmartAccount } from "@/lib/hooks/smart-account-context";
 import { generateOnRampURL } from "@coinbase/cbpay-js";
 import {
   Modal,
@@ -11,8 +16,11 @@ import {
   Skeleton,
   Button,
   Input,
+  Checkbox,
+  Select,
+  SelectItem,
 } from "@nextui-org/react";
-import { usePrivy, useWallets } from "@privy-io/react-auth";
+import { usePrivy, useSendTransaction, useWallets } from "@privy-io/react-auth";
 import { useEffect, useState } from "react";
 import { createPublicClient, http } from "viem";
 import { useWriteContract } from "wagmi";
@@ -26,21 +34,42 @@ export default function DonateModal({
   onOpenChange: (open: boolean) => void;
   campaignId: number;
 }) {
+  const tokens = [
+    {
+      name: Token.USDC,
+      address: getTokenAddress(Token.USDC),
+    },
+    {
+      name: Token.USDT,
+      address: getTokenAddress(Token.USDT),
+    },
+    {
+      name: Token.DAI,
+      address: getTokenAddress(Token.DAI),
+    },
+    {
+      name: Token.WETH,
+      address: getTokenAddress(Token.WETH),
+    },
+  ];
+  const [token, setToken] = useState(TokenAddress.USDC);
   const [balance, setBalance] = useState<number>(0);
+  const [decimals, setDecimals] = useState<number>(6);
   const { user } = usePrivy();
   const [loading, setLoading] = useState<boolean>(false);
   const [amount, setAmount] = useState<number>(0);
-  const res = useSmartAccount();
   const { wallets } = useWallets();
-  const { writeContractAsync, isPending } = useWriteContract();
+  const { writeContractAsync } = useWriteContract();
+  const [recurring, setRecurring] = useState<boolean>(false);
+  const { sendTransaction } = useSendTransaction();
 
   console.log(wallets);
 
   useEffect(() => {
-    if (isOpen && user) {
+    if (isOpen && user && token) {
       fetchBalance();
     }
-  }, [isOpen, user]);
+  }, [isOpen, user, token]);
 
   const fetchBalance = async () => {
     const publicClient = createPublicClient({
@@ -49,7 +78,7 @@ export default function DonateModal({
     });
 
     const balance = await publicClient.readContract({
-      address: USDC_ADDRESS,
+      address: token as `0x${string}`,
       functionName: "balanceOf",
       args: [user?.wallet?.address],
       abi: [
@@ -73,12 +102,90 @@ export default function DonateModal({
         },
       ],
     });
-    setBalance(Number(balance as bigint) / 10 ** 6);
+
+    const decimals = await publicClient.readContract({
+      address: token as `0x${string}`,
+      functionName: "decimals",
+      abi: [
+        {
+          constant: true,
+          inputs: [],
+          name: "decimals",
+          outputs: [
+            {
+              name: "",
+              type: "uint8",
+            },
+          ],
+          payable: false,
+          type: "function",
+        },
+      ],
+    });
+    setBalance(Number(balance as bigint) / 10 ** Number(decimals));
+    setDecimals(Number(decimals));
   };
 
   const donate = async () => {
+    const publicClient = createPublicClient({
+      chain: chain,
+      transport: http(),
+    });
+
+    const multiplier = recurring ? 3 : 1;
+    const depositAmount = BigInt(amount * multiplier * 10 ** decimals);
+
+    if (token !== TokenAddress.USDC) {
+      const { to, data } = await getSwapQuote(
+        token,
+        TokenAddress.USDC,
+        amount * multiplier * 10 ** 18
+      );
+
+      const approve0xTx = await writeContractAsync({
+        address: token as `0x${string}`,
+        abi: [
+          {
+            constant: false,
+            inputs: [
+              {
+                name: "_spender",
+                type: "address",
+              },
+              {
+                name: "_value",
+                type: "uint256",
+              },
+            ],
+            name: "approve",
+            outputs: [
+              {
+                name: "",
+                type: "bool",
+              },
+            ],
+            payable: false,
+            type: "function",
+          },
+        ],
+        functionName: "approve",
+        args: [to, depositAmount],
+      });
+
+      await publicClient.waitForTransactionReceipt({ hash: approve0xTx });
+
+      const tx = await sendTransaction({
+        to,
+        data,
+      });
+
+      await publicClient.waitForTransactionReceipt({
+        hash: tx.transactionHash as `0x${string}`,
+      });
+    }
+
     const tx = await writeContractAsync({
-      address: USDC_ADDRESS,
+      address: token as `0x${string}`,
       abi: [
         {
           constant: false,
@@ -104,22 +211,34 @@ export default function DonateModal({
         },
       ],
       functionName: "approve",
-      args: [PAPABASE_ADDRESS, BigInt(amount * 10 ** 6)],
-    });
-
-    const publicClient = createPublicClient({
-      chain: chain,
-      transport: http(),
+      args: [PAPABASE_ADDRESS, depositAmount],
     });
 
     await publicClient.waitForTransactionReceipt({ hash: tx });
 
-    const depositTx = await writeContractAsync({
-      address: PAPABASE_ADDRESS,
-      abi: PAPABASE_ABI,
-      functionName: "depositFunds",
-      args: [campaignId, BigInt(amount * 10 ** 6)],
-    });
+    let depositTx: `0x${string}` = "0x";
+    if (recurring) {
+      depositTx = await writeContractAsync({
+        address: PAPABASE_ADDRESS,
+        abi: PAPABASE_ABI,
+        functionName: "depositFunds",
+        args: [campaignId, depositAmount],
+      });
+    } else {
+      const monthInSeconds = 60 * 60 * 24 * 30;
+      depositTx = await writeContractAsync({
+        address: PAPABASE_ADDRESS,
+        abi: PAPABASE_ABI,
+        functionName: "depositFundsRecurring",
+        args: [
+          user?.wallet?.address,
+          campaignId,
+          depositAmount,
+          3,
+          monthInSeconds,
+        ],
+      });
+    }
 
     await publicClient.waitForTransactionReceipt({ hash: depositTx });
 
@@ -128,7 +247,7 @@ export default function DonateModal({
       body: JSON.stringify({
         userId: user?.id,
         campaignId,
-        amount,
+        amount: amount * multiplier,
         txHash: depositTx,
       }),
     });
@@ -148,7 +267,7 @@ export default function DonateModal({
   };
 
   return (
-    <Modal size="sm" isOpen={isOpen} onOpenChange={onOpenChange}>
+    <Modal size="lg" isOpen={isOpen} onOpenChange={onOpenChange}>
       <ModalContent>
         {(onClose) => (
           <>
@@ -157,17 +276,62 @@ export default function DonateModal({
               {loading && <Skeleton className="w-[100px] h-6" />}
               {!loading && (
                 <>
-                  <Input
-                    label="Amount"
-                    type="number"
-                    min={0}
-                    value={amount.toString()}
-                    onValueChange={(val: string) => setAmount(parseInt(val))}
-                  />
-                  <p className="text-xs">
-                    <span className="font-bold">USDC</span> balance is: $
-                    {balance.toFixed(2)}
-                  </p>
+                  <Select
+                    label="Select token"
+                    placeholder="Select a token"
+                    selectedKeys={token ? [token] : []}
+                    // @ts-ignore
+                    onChange={(e) => setToken(e.target.value)}
+                  >
+                    <SelectItem
+                      key={TokenAddress.USDC}
+                      value={TokenAddress.USDC}
+                    >
+                      {Token.USDC}
+                    </SelectItem>
+                    <SelectItem
+                      key={TokenAddress.USDT}
+                      value={TokenAddress.USDT}
+                    >
+                      {Token.USDT}
+                    </SelectItem>
+                    <SelectItem key={TokenAddress.DAI} value={TokenAddress.DAI}>
+                      {Token.DAI}
+                    </SelectItem>
+                    <SelectItem
+                      key={TokenAddress.WETH}
+                      value={TokenAddress.WETH}
+                    >
+                      ETH
+                    </SelectItem>
+                  </Select>
+                  {token && (
+                    <>
+                      <Input
+                        label="Amount"
+                        type="number"
+                        min={0}
+                        value={amount.toString()}
+                        onValueChange={(val: string) =>
+                          setAmount(parseInt(val))
+                        }
+                      />
+                      <p className="text-xs">
+                        <span className="font-bold">
+                          {tokens.find((t) => t.address === token)?.name}
+                        </span>{" "}
+                        balance is: ${balance.toFixed(2)}
+                      </p>
+
+                      <Checkbox
+                        checked={recurring}
+                        onValueChange={(val) => setRecurring(recurring)}
+                        color="primary"
+                      >
+                        Repeat this donation each month for three months
+                      </Checkbox>
+                    </>
+                  )}
                 </>
               )}
             </ModalBody>
@@ -183,7 +347,7 @@ export default function DonateModal({
                   <Button
                     color="primary"
                     onPress={() => donate()}
-                    isDisabled={!amount || balance < amount}
+                    isDisabled={!token || !amount || balance < amount}
                   >
                     Donate
                   </Button>
