@@ -78,7 +78,7 @@ export default function NewCampaignPage() {
       });
 
       await refetch();
-      const newCampaignId = Number(campaignCount) - 1;
+      const newCampaignId = Number(campaignCount);
 
       const repo = repos.find((repo: any) => repo.id === parseInt(value));
 
