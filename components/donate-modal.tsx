@@ -242,16 +242,6 @@ export default function DonateModal({
 
     await publicClient.waitForTransactionReceipt({ hash: depositTx });
 
-    await fetch("/api/donations", {
-      method: "POST",
-      body: JSON.stringify({
-        userId: user?.id,
-        campaignId,
-        amount: amount * multiplier,
-        txHash: depositTx,
-      }),
-    });
-
     onOpenChange(false);
   };
 
