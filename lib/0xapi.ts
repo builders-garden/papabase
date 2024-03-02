@@ -8,14 +8,12 @@ export enum Token {
   WETH = "WETH",
   DAI = "DAI",
   USDC = "USDC",
-  USDT = "USDT",
 }
 
 export enum TokenAddress {
   WETH = "0x4200000000000000000000000000000000000006",
   DAI = "0x50c5725949A6F0c72E6C4a641F24049A917DB0Cb",
   USDC = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
-  USDT = "0xdAC17F958D2ee523a2206206994597C13D831ec7",
 }
 
 export const getTokenAddress = (token: Token) => {
@@ -26,8 +24,6 @@ export const getTokenAddress = (token: Token) => {
       return TokenAddress.DAI;
     case Token.USDC:
       return TokenAddress.USDC;
-    case Token.USDT:
-      return TokenAddress.USDT;
   }
 };
 
@@ -51,15 +47,14 @@ export const getSwapQuote = async (
   sellAmountWei: number,
   chain: Chain = Chain.BASE
 ): Promise<Quote> => {
-  const response = await fetch(
-    `${API_URL(
-      chain
-    )}/swap/v1/quote?sellToken=${sellToken}&buyToken=${buyToken}&sellAmount=${sellAmountWei}`,
-    {
-      headers: {
-        "0x-api-key": process.env.ZERO_X_API_KEY!,
-      },
-    }
-  );
+  const url = `${API_URL(
+    chain
+  )}/swap/v1/quote?sellToken=${sellToken}&buyToken=${buyToken}&sellAmount=${sellAmountWei}`;
+  console.log(url);
+  const response = await fetch(url, {
+    headers: {
+      "0x-api-key": process.env.NEXT_PUBLIC_ZERO_X_API_KEY!,
+    },
+  });
   return await response.json();
 };
