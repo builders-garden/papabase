@@ -1,6 +1,7 @@
 import { PAPABASE_ADDRESS, USDC_ADDRESS, chain } from "@/lib/constants";
 import { PAPABASE_ABI } from "@/lib/contracts/abi";
 import { useSmartAccount } from "@/lib/hooks/smart-account-context";
+import { generateOnRampURL } from "@coinbase/cbpay-js";
 import {
   Modal,
   ModalContent,
@@ -135,6 +136,17 @@ export default function DonateModal({
     onOpenChange(false);
   };
 
+  const onRamp = () => {
+    const onRampURL = generateOnRampURL({
+      appId: "4cf9d8ee-7529-40a6-8c8e-7672ec71c3b9",
+      destinationWallets: [
+        { address: user?.wallet?.address!, assets: ["ETH", "USDC"] },
+      ],
+    });
+
+    typeof window !== undefined && window.open(onRampURL, "_blank");
+  };
+
   return (
     <Modal size="sm" isOpen={isOpen} onOpenChange={onOpenChange}>
       <ModalContent>
@@ -158,15 +170,15 @@ export default function DonateModal({
                   </p>
                 </>
               )}
-              {/* <CoinbaseButton
-                destinationWalletAddress={user?.wallet?.address!}
-              /> */}
             </ModalBody>
             <ModalFooter>
               {!loading && (
                 <>
                   <Button color="danger" variant="light" onPress={onClose}>
                     Close
+                  </Button>
+                  <Button color="primary" onPress={() => onRamp()}>
+                    Buy USDC
                   </Button>
                   <Button
                     color="primary"
