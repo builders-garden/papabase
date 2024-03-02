@@ -1,4 +1,5 @@
-import { BASE_URL } from "../constants";
+import { fetchNftTokenBalance } from "../airstack/nft-balance";
+import { BASE_URL, PAPABASE_ADDRESS } from "../constants";
 import { GroupsClient } from "./client";
 
 const CONVERSE_GROUP_LINK_ENDPOINT =
@@ -27,8 +28,11 @@ export async function shouldAddGroupMember(
   groupId: string,
   accountAddress: string
 ): Promise<boolean> {
-  // TODO: Put arbitrary token gating logic in here
-  return true;
+  const nftBalance = await fetchNftTokenBalance(
+    accountAddress,
+    PAPABASE_ADDRESS
+  );
+  return parseInt(nftBalance.balance as string, 10) > 0;
 }
 
 export interface XMTPGroup {
@@ -47,14 +51,12 @@ export async function createGroupLink(
   description: string
 ): Promise<XMTPGroup> {
   const groupId = await client.createGroup("group-creator-is-admin");
-  console.log("Creating group with id", groupId);
   const request = {
     webhook: WEBHOOK_URL,
     topic: groupId,
     name,
     description,
   };
-  console.log(request);
   const res = await fetch(CONVERSE_GROUP_LINK_ENDPOINT, {
     method: "POST",
     headers: {
@@ -62,9 +64,7 @@ export async function createGroupLink(
     },
     body: JSON.stringify(request),
   });
-  console.log(res);
   const data = await res.json();
-  console.log("Group link data", data);
 
   return data;
 }
